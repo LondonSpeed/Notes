@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notebook</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<style>
+:root{--bg:#f2f2f7;--surf:#fff;--ink:#1c1c1e;--mute:#6e6e73;--line:#e2e2e7;--acc:#a8680f;--accbg:#fbefd9;--danger:#a23b3b;color-scheme:light;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0b0c;--surf:#1c1c1e;--ink:#f2f2f7;--mute:#98989f;--line:#2e2e32;--acc:#f5b942;--accbg:#33290f;--danger:#e08a8a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b0b0c;--surf:#1c1c1e;--ink:#f2f2f7;--mute:#98989f;--line:#2e2e32;--acc:#f5b942;--accbg:#33290f;--danger:#e08a8a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.app{display:flex;min-height:100vh}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;background:var(--surf);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:20}
+nav button{flex:1;padding:8px 0;color:var(--mute);font-size:11px;border-radius:8px;position:relative}
+nav button.on{color:var(--acc);font-weight:600}
+nav .badge{font-size:11px;background:var(--acc);color:var(--bg);border-radius:9px;padding:0 6px;margin-left:3px}
+main{flex:1;width:100%;max-width:720px;margin:0 auto;padding:20px 18px 110px}
+h1,h2,.serif{font-family:Newsreader,Georgia,serif;font-weight:500}
+h1{font-size:32px;line-height:1.15;margin:8px 0 18px}
+h2{font-size:21px;margin:28px 0 10px}
+.top{display:flex;justify-content:space-between;align-items:center;color:var(--mute)}
+.top .brand{font-family:Newsreader,serif;font-size:18px;color:var(--ink)}
+.ib{padding:6px 10px;border-radius:8px;color:var(--mute)}.ib:hover{background:var(--accbg)}
+.cap{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px}
+.cap textarea{width:100%;min-height:110px;border:0;background:none;resize:vertical;font:18px/1.55 Newsreader,Georgia,serif;outline:none}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.btn{background:var(--acc);color:var(--bg);padding:9px 18px;border-radius:10px;font-weight:600}
+.btn2{border:1px solid var(--line);padding:8px 14px;border-radius:10px;color:var(--ink)}
+.btn2.danger{color:var(--danger)}
+.item{display:block;width:100%;text-align:left;padding:14px 2px;border-bottom:1px solid var(--line)}
+.item .t{font:500 18px/1.3 Newsreader,Georgia,serif}
+.item .s{color:var(--mute);font-size:14px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .m{color:var(--mute);font-size:12px;margin-top:4px}
+.empty{color:var(--mute);padding:18px 0;font-family:Newsreader,serif;font-size:17px;font-style:italic}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tile{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left}
+.tile b{display:block;font:500 24px Newsreader,serif}.tile span{color:var(--mute);font-size:13px}
+input.f,select.f{width:100%;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.sheet{position:fixed;inset:0 0 calc(62px + env(safe-area-inset-bottom,0px)) 0;background:var(--bg);z-index:10;overflow:auto;padding-top:env(safe-area-inset-top,0px)}
+.sheet .in{max-width:720px;margin:0 auto;padding:14px 18px 140px}
+.ttl{width:100%;border:0;background:none;outline:none;font:500 28px/1.2 Newsreader,Georgia,serif;margin:14px 0 6px}
+.body{width:100%;min-height:42vh;border:0;background:none;outline:none;resize:none;font:18px/1.65 Newsreader,Georgia,serif}
+.photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.photos div{position:relative}.photos img{height:110px;border-radius:10px;display:block}
+.photos button{position:absolute;top:4px;right:4px;background:#000a;color:#fff;border-radius:50%;width:22px;height:22px;line-height:22px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.saved{color:var(--mute);font-size:12px}
+.tools{position:sticky;top:0;background:var(--bg);display:flex;gap:2px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line);z-index:2}
+.tb{min-width:36px;height:34px;border-radius:8px;padding:0 9px;font-size:14px}.tb:hover{background:var(--accbg)}
+div.body{padding:8px 0;overflow-wrap:anywhere}div.body h3{font:500 24px/1.25 Newsreader,Georgia,serif;margin:10px 0 4px}div.body ul{padding-left:24px;margin:6px 0}
+.ck{padding:2px 0}.ck.on{color:var(--mute);text-decoration:line-through}
+.cb{display:inline-block;width:18px;height:18px;border:2px solid var(--mute);border-radius:5px;vertical-align:-3px;margin-right:9px;cursor:pointer;text-decoration:none}
+.ck.on .cb{background:var(--acc);border-color:var(--acc)}.ck.on .cb::after{content:'';display:block;width:4px;height:9px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg);margin:0 0 0 4px}
+#toast{position:fixed;z-index:30;bottom:calc(74px + env(safe-area-inset-bottom,0px));right:12px;left:12px;max-width:420px;margin-left:auto;background:var(--surf);border:1px solid var(--acc);border-radius:14px;padding:14px 16px}
+#toast[hidden]{display:none}
+#fab,#fabc{position:fixed;right:18px;z-index:15;border-radius:50%;background:var(--acc);color:var(--bg);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#fab{bottom:calc(76px + env(safe-area-inset-bottom,0px));width:56px;height:56px;font-size:30px;line-height:1}
+#fabc{bottom:calc(142px + env(safe-area-inset-bottom,0px));width:42px;height:42px;right:25px;font-size:20px;background:var(--surf);color:var(--acc);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.grid .item{border:1px solid var(--line);border-radius:12px;padding:12px}
+.c1{background:rgba(255,214,10,.17)}.c2{background:rgba(70,190,110,.17)}.c3{background:rgba(70,140,255,.17)}.c4{background:rgba(255,95,150,.17)}.c5{background:rgba(160,110,255,.18)}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:var(--surf)}.dot.c1{background:#e6c74c}.dot.c2{background:#6cc58a}.dot.c3{background:#6a9ff0}.dot.c4{background:#ee79a5}.dot.c5{background:#a98af0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.fc{border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px}.fc.on{background:var(--accbg);color:var(--acc);border-color:var(--acc)}
+.refs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;font-size:13px}.chip button,.chip a{padding:4px 11px;color:var(--acc);text-decoration:none}.chip a{border-left:1px solid var(--line);font-weight:600}
+a.nl{color:var(--acc);text-decoration:underline;cursor:pointer}
+.item{padding:11px 2px}.item .s{-webkit-line-clamp:1}.th{float:right;width:44px;height:44px;object-fit:cover;border-radius:8px;margin-left:10px}
+.gh{font:500 13px Inter,sans-serif;color:var(--mute);margin:18px 0 2px}.sh h2{margin:20px 0 4px;font-size:19px}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.cover{text-align:left;min-height:120px;border:1px solid var(--line);border-left:6px solid var(--acc);border-radius:6px 14px 14px 6px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;background-color:var(--surf)}.cover .cn{font-size:20px;line-height:1.2}
+.cover.add{border-left-width:1px;border-style:dashed;align-items:center;justify-content:center;color:var(--mute)}
+.sug{padding:6px 2px 10px;border-bottom:1px solid var(--line)}
+.chip small{color:var(--mute);margin-left:5px;font-size:12px}
+#pick{position:fixed;inset:0 0 calc(62px + env(safe-area-inset-bottom,0px)) 0;background:var(--bg);padding:18px;overflow:auto;z-index:5}
+#snack{position:fixed;z-index:30;bottom:calc(74px + env(safe-area-inset-bottom,0px));left:12px;right:12px;max-width:360px;margin:auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:8px 8px 8px 16px;display:flex;justify-content:space-between;align-items:center}#snack[hidden]{display:none}#snack .btn2{color:var(--bg);border-color:var(--bg)}
+.pill{display:inline-block;background:var(--accbg);color:var(--acc);border-radius:20px;padding:2px 10px;font-size:12px}
+.day{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+textarea.x{width:100%;height:50vh;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:10px;font:12px/1.4 ui-monospace,monospace}
+@media(min-width:860px){
+ nav{top:0;bottom:auto;right:auto;width:190px;flex-direction:column;justify-content:flex-start;gap:4px;border-top:0;border-right:1px solid var(--line);padding:70px 12px}
+ nav button{flex:none;text-align:left;font-size:15px;padding:10px 12px}
+ main{margin-left:230px;max-width:760px;padding-bottom:60px}
+ .app{display:block}
+ .sheet{inset:0 0 0 190px}
+ #toast{left:210px}
+ #pick{left:190px}
+ #fab{bottom:24px}#fabc{bottom:90px}
+}
+/* v2: Apple Notes-like look */
+h1{font:700 32px/1.15 Inter,system-ui,-apple-system,sans-serif;letter-spacing:-.02em;margin:8px 0 14px}
+h2{font:700 20px/1.2 Inter,system-ui,-apple-system,sans-serif;letter-spacing:-.01em}
+.sh h2{font-size:19px;margin:20px 2px 8px}
+.gh{font:700 17px Inter,system-ui,sans-serif;color:var(--ink);margin:22px 2px 8px}
+nav{background:color-mix(in srgb,var(--surf) 86%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.item{display:block;width:100%;text-align:left;background:var(--surf);padding:10px 14px;border:0;border-radius:0;margin:0;position:relative}
+.item:not(.item+.item){border-radius:12px 12px 0 0}
+.item:not(:has(+.item)){border-radius:0 0 12px 12px}
+.item:not(.item+.item):not(:has(+.item)){border-radius:12px}
+.item+.item::before{content:'';position:absolute;top:0;left:14px;right:0;border-top:.5px solid var(--line)}
+.item .t{font:600 16px/1.3 Inter,system-ui,-apple-system,sans-serif}
+.nc{display:flex;align-items:center;gap:10px}
+.nc .tx{min-width:0;flex:1}
+.nc .t,.nc .s,.nc .m{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.item .s{font-size:14px;margin-top:1px}
+.item .s .dt{color:var(--ink);margin-right:7px}
+.item .m{font-size:12px;margin-top:2px}
+.nc .th{float:none;margin:0;width:42px;height:42px;border-radius:6px;flex:none}
+.item.c1{box-shadow:inset 3px 0 0 #e6c74c}.item.c2{box-shadow:inset 3px 0 0 #6cc58a}.item.c3{box-shadow:inset 3px 0 0 #6a9ff0}.item.c4{box-shadow:inset 3px 0 0 #ee79a5}.item.c5{box-shadow:inset 3px 0 0 #a98af0}
+.sug{padding:6px 14px 12px;border-bottom:0;margin-bottom:6px}
+.cap textarea{font:17px/1.55 Inter,system-ui,-apple-system,sans-serif}
+.ttl{font:700 26px/1.2 Inter,system-ui,-apple-system,sans-serif;letter-spacing:-.01em}
+.body{font:17px/1.6 Inter,system-ui,-apple-system,sans-serif}
+div.body h3{font:700 21px/1.25 Inter,system-ui,-apple-system,sans-serif}
+</style>
+</head>
+<body>
+<div class="app"><nav id="nav"></nav><main id="main"></main></div>
+<div id="sheet" class="sheet" hidden></div>
+<div id="toast" hidden role="alert"></div><div id="snack" hidden></div>
+<button id="fabc" data-act="fabck" aria-label="New checklist">☐</button><button id="fab" data-act="fab" aria-label="New note">+</button>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const dk=d=>{d=new Date(d);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const today=()=>dk(new Date());
+function fs(iso){const d=new Date(iso),t=new Date(),y=new Date(t);y.setDate(t.getDate()-1);const k=dk(d);if(k===dk(t))return d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});if(k===dk(y))return 'Yesterday';if(t-d<6*864e5)return d.toLocaleDateString(undefined,{weekday:'long'});return d.toLocaleDateString(undefined,{day:'numeric',month:'numeric',year:'2-digit'})}
+const fmt=iso=>new Date(iso).toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+let D;
+try{D=JSON.parse(localStorage.getItem('nb1'))}catch(e){}
+D=D||{notes:[],cols:[{id:'c1',name:'Personal'},{id:'c2',name:'Bible research'},{id:'c3',name:'Ideas'}]};
+D.trash=(D.trash||[]).filter(x=>Date.now()-new Date(x.deletedAt)<30*864e5);
+let theme='';try{theme=localStorage.getItem('nbTheme')||''}catch(e){}
+if(theme)document.documentElement.dataset.theme=theme;
+const S={view:'home',col:null,day:today(),q:'',ed:null,photos:[],f:{}};
+let tm;
+function save(){try{localStorage.setItem('nb1',JSON.stringify(D));const e=$('#sv');if(e)e.textContent='Saved'}catch(e){alert('Storage is full. Export your notes and remove some photos.')}}
+const title=n=>n.title||(n.body||'').split('\n')[0].slice(0,60)||'Untitled';
+const colName=id=>(D.cols.find(c=>c.id===id)||{}).name;
+const live=()=>D.notes.filter(n=>!n.archived);
+const sortN=a=>a.slice().sort((x,y)=>(y.pinned-x.pinned)||y.created.localeCompare(x.created));
+const inbox=()=>live().filter(n=>!n.col&&n.type==='note');
+function newNote(o){const n=Object.assign({id:uid(),title:'',body:'',created:new Date().toISOString(),type:'note',col:null,pinned:false,archived:false,photos:[]},o);D.notes.push(n);save();return n}
+function prog(n){const h=n.html||'',t=(h.match(/class="ck/g)||[]).length;return t?' · '+(h.match(/class="ck on/g)||[]).length+'/'+t+' done':''}
+function card(n){const t=title(n),b=n.title?(n.body||''):(n.body||'').split('\n').slice(1).join(' '),pv=b.replace(/\s+/g,' ').trim(),due=n.remind&&!n.done,
+ fl=[n.col?esc(colName(n.col))+(n.topic?' › '+esc(n.topic):''):'',n.upnow?'Up Now':'',n.type==='journal'?'Journal':'',due?'Reminder '+fmt(n.remind)+(n.remind<=new Date().toISOString()?' (due)':''):'',prog(n).replace(' · ',''),n.archived?'Archived':''].filter(Boolean).join(' · ');
+ return `<button class="item nc ${n.color||''}" data-open="${n.id}"><div class="tx"><div class="t">${esc(t)}</div><div class="s"><span class="dt">${esc(fs(n.created))}</span>${pv?esc(pv):'<i>No additional text</i>'}</div>${fl?`<div class="m">${fl}</div>`:''}</div>${n.photos.length?`<img class="th" src="${n.photos[0]}" alt="">`:''}</button>`}
+const list=(a,msg)=>a.length>3?glist(a):a.length?sortN(a).map(card).join(''):`<div class="empty">${msg}</div>`;
+function topbar(){return `<div class="top"><span class="brand">Notebook</span><span><button class="ib" data-act="theme">Light / dark</button><button class="ib" data-act="export">Export</button></span></div>`}
+const views={
+ home(){return homeView()},
+ _oh(){const g=new Date().getHours();const hi=g<12?'Good morning':g<18?'Good afternoon':'Good evening';
+  const rec=sortN(live()).slice(0,5);
+  return topbar()+`<h1>${hi}</h1><div class="cap"><textarea id="cap" placeholder="Capture a thought…" aria-label="Quick capture"></textarea><div class="row"><span><label class="btn2" style="cursor:pointer">Add photo<input type="file" accept="image/*" id="capimg" hidden></label> <span class="saved" id="capph"></span></span><button class="btn" data-act="capture">Save to Inbox</button></div></div>
+  <div class="tiles"><button class="tile" data-go="inbox"><b>${inbox().length}</b><span>in Inbox</span></button><button class="tile" data-go="journal"><b>${live().filter(n=>n.type==='journal'&&dk(n.created)===today()).length}</b><span>journal entries today</span></button></div>
+  <h2>Recent</h2>`+list(rec,'Nothing yet. Write your first thought above.')},
+ connections(){return connView()},
+ upnow(){return topbar()+'<h1>Up Now</h1>'+list(upNow(),'Nothing open right now. Mark a note "Up Now" to keep it here.')},
+ trash(){return topbar()+`<button class="ib" data-go="library">‹ Library</button><h1>Trash</h1><p class="saved">Deleted notes are removed for good after 30 days.</p>`+(D.trash.length?D.trash.map(n=>`<div class="item"><div class="t">${esc(title(n))}</div><div class="m">Deleted ${fmt(n.deletedAt)}</div><div class="bar"><button class="btn2" data-act="restore" data-id="${n.id}">Restore</button><button class="btn2 danger" data-act="purge" data-id="${n.id}">Delete forever</button></div></div>`).join(''):'<div class="empty">Trash is empty.</div>')},
+ reminders(){const r=D.notes.filter(n=>n.remind&&!n.done&&!n.archived).sort((a,b)=>a.remind.localeCompare(b.remind));return topbar()+`<h1>Reminders</h1>`+(r.length?r.map(card).join(''):`<div class="empty">No reminders. Open a note and choose a time under Remind me.</div>`)},
+ inbox(){return inboxView()},
+ _oi(){return topbar()+`<h1>Inbox</h1>`+list(inbox(),'Inbox is clear. Everything is organized.')},
+ journal(){const day=S.day,es=live().filter(n=>n.type==='journal'&&dk(n.created)===day).sort((a,b)=>a.created.localeCompare(b.created));
+  const days={};live().filter(n=>n.type==='journal').forEach(n=>{const k=dk(n.created);days[k]=(days[k]||0)+1});
+  const ks=Object.keys(days).sort().reverse();
+  return topbar()+`<h1>Journal</h1><div class="day"><button class="btn2" data-act="prev">‹</button><input type="date" class="f" id="dayin" value="${day}"><button class="btn2" data-act="next">›</button><button class="btn2" data-act="tday">Today</button></div>
+  <h2>${new Date(day+'T12:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</h2>`+
+  (es.length?es.map(card).join(''):`<div class="empty">No entries for this day.</div>`)+`<div class="bar"><button class="btn" data-act="jnew">New entry</button></div>`+
+  (ks.length?`<h2>Days with entries</h2>`+ks.map(k=>`<button class="item" data-day="${k}"><div class="t">${new Date(k+'T12:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</div><div class="m">${days[k]} entr${days[k]>1?'ies':'y'}</div></button>`).join(''):'')},
+ library(){return libView()},
+ _ol(){
+  if(S.col){const c=D.cols.find(x=>x.id===S.col);if(!c){S.col=null;return views.library()}
+   return topbar()+`<button class="ib" data-act="back">‹ Library</button><h1>${esc(c.name)}</h1>`+list(live().filter(n=>n.col===c.id),'Nothing here yet.')+`<div class="bar"><button class="btn" data-act="cnew">New note</button><button class="btn2" data-act="ren">Rename</button><button class="btn2 danger" data-act="delcol">Delete collection</button></div>`}
+  return topbar()+`<h1>Library</h1>`+(D.cols.length?D.cols.map(c=>`<button class="item" data-col="${c.id}"><div class="t">${esc(c.name)}</div><div class="m">${live().filter(n=>n.col===c.id).length} notes</div></button>`).join(''):'<div class="empty">Create a collection to group notes.</div>')+`<div class="bar"><button class="btn" data-act="addcol">New collection</button><button class="btn2" data-go="trash">Trash (${D.trash.length})</button></div>`},
+ search(){return searchView()},
+ _os(){const q=S.q.trim().toLowerCase();
+  const r=q?D.notes.filter(n=>(title(n)+' '+n.body).toLowerCase().includes(q)):[];
+  return topbar()+`<h1>Search</h1><input class="f" id="q" placeholder="Search titles and text" value="${esc(S.q)}" autofocus><div id="res">`+(q?list(r,'No notes match.'):'<div class="empty">Type to search every note, including archived ones.</div>')+`</div>`}
+};
+function render(){
+ const inb=inbox().length;
+ const items=[['home','Home'],['journal','Journal'],['library','Notebooks'],['search','Search']];
+ $('#nav').innerHTML=items.map(([k,l])=>`<button data-go="${k}" class="${S.view===k?'on':''}">${l}${(k==='inbox'?inb:k==='reminders'?dueN():0)?`<span class="badge">${k==='inbox'?inb:dueN()}</span>`:''}</button>`).join('');
+ $('#main').innerHTML=views[S.view]();
+ if(S.view==='search'&&!S.q)$('#q').focus();if(S.view==='home'){const t=$('#cap');if(t&&S.cap)t.value=S.cap;capInfo()}
+}
+function openNote(id,foc){S.ed=id;$('#toast').hidden=true;const n=D.notes.find(x=>x.id===id);const sh=$('#sheet');sh.hidden=false;
+ sh.innerHTML=`<div class="in"><div class="row"><button class="ib" data-act="close">‹ Done</button><span class="saved" id="sv">Saved</span></div>
+ <div class="m saved">${fmt(n.created)} ${n.type==='journal'?'<span class="pill">Journal</span>':''}</div>
+ <input class="ttl" id="et" placeholder="Title" value="${esc(n.title)}"><div class="tools" role="toolbar" aria-label="Text formatting"><button class="tb" data-fmt="bold" title="Bold"><b>B</b></button><button class="tb" data-fmt="italic" title="Italic"><i>I</i></button><button class="tb" data-fmt="underline" title="Underline"><u>U</u></button><button class="tb" data-fmt="strikeThrough" title="Strikethrough"><s>S</s></button><button class="tb" data-fmt="hl" title="Highlight" style="background:rgba(255,214,10,.45)">Highlight</button><button class="tb" data-fmt="sm" title="Smaller text">A−</button><button class="tb" data-fmt="md" title="Normal size">A</button><button class="tb" data-fmt="lg" title="Larger text">A+</button><button class="tb" data-fmt="h" title="Heading">Heading</button><button class="tb" data-fmt="ul" title="Bulleted list">• List</button><button class="tb" data-fmt="ck" title="Checklist">☐ Checklist</button><button class="tb" data-fmt="removeFormat" title="Clear formatting">Clear</button></div><div class="body" id="eb" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note text"></div><div id="refs" class="refs"></div>
+ <div class="photos">${n.photos.map((p,i)=>`<div><img src="${p}" alt=""><button data-rmp="${i}" aria-label="Remove photo">×</button></div>`).join('')}</div>
+ <div class="bar"><label class="btn2" style="cursor:pointer">Add photo<input type="file" accept="image/*" id="eimg" hidden></label>
+ <select class="f" id="ec" style="width:auto" aria-label="Notebook"><option value="">Inbox (no notebook)</option>${D.cols.map(c=>`<option value="${c.id}" ${n.col===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><input class="f" id="etp" list="tpl" placeholder="Topic (optional)" value="${esc(n.topic||'')}" style="width:auto;max-width:190px" aria-label="Topic"><datalist id="tpl">${topics(n.col).map(t=>`<option value="${esc(t)}">`).join('')}</datalist></div>
+ <div class="bar"><span class="saved">Remind me</span><button class="btn2" data-rp="later">Later today</button><button class="btn2" data-rp="tom">Tomorrow morning</button><button class="btn2" data-rp="week">Next week</button></div><div class="bar"><label class="saved">Or pick <input type="datetime-local" class="f" id="er" style="width:auto" value="${n.remind?lv(n.remind):''}"></label><button class="btn2" data-act="rclear">Clear reminder</button></div><div class="bar" role="group" aria-label="Colour">${['','c1','c2','c3','c4','c5'].map(c=>`<button class="dot ${c}" data-color="${c}" aria-label="Colour ${c||'none'}"></button>`).join('')}</div><div class="bar"><button class="btn2" data-act="upnow">${n.upnow?'Remove from Up Now':'Mark Up Now'}</button><button class="btn2" data-act="pin">${n.pinned?'Unpin':'Pin'}</button><button class="btn2" data-act="arch">${n.archived?'Unarchive':'Archive'}</button><button class="btn2" data-act="conv">${n.type==='journal'?'Make a note':'Make journal entry'}</button><button class="btn2 danger" data-act="del">Delete</button></div></div>`;
+ $('#eb').innerHTML=n.html||esc(n.body).replace(/\n/g,'<br>');renderRefs();
+ if(foc){const b=$('#eb');b.focus();const r=document.createRange();r.selectNodeContents(b);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+}
+const cur=()=>D.notes.find(x=>x.id===S.ed);
+function closeNote(){const n=S.ed&&cur();if(n&&!n.title&&!n.body.trim()&&!n.photos.length&&!n.remind){D.notes=D.notes.filter(x=>x!==n);save()}$('#sheet').hidden=true;S.ed=null;render()}
+function shrink(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.7))};im.src=r.result};r.readAsDataURL(file)}
+function exportSheet(){const sh=$('#sheet');sh.hidden=false;S.ed=null;
+ const md=D.notes.slice().sort((a,b)=>a.created.localeCompare(b.created)).map(n=>`## ${title(n)}\n*${n.created}${n.type==='journal'?' · journal':''}${n.col?' · '+colName(n.col):''}*\n\n${n.body}\n`).join('\n---\n\n');
+ sh.innerHTML=`<div class="in"><button class="ib" data-act="close">‹ Done</button><h1>Export and restore</h1><p class="saved">Select all and copy, then paste into a file on your device. JSON includes photos and can be restored below. Markdown has text only.</p>
+ <div class="bar"><button class="btn2" data-x="json">JSON (full backup)</button><button class="btn2" data-x="md">Markdown</button></div>
+ <textarea class="x" id="xo" readonly></textarea><div class="bar"><button class="btn" data-act="copyx">Copy</button></div>
+ <h2>Restore from JSON</h2><textarea class="x" id="xi" style="height:120px" placeholder="Paste a JSON backup here"></textarea><div class="bar"><button class="btn2 danger" data-act="restore">Replace my data</button></div></div>`;
+ window._md=md;}
+document.addEventListener('click',e=>{
+ const nl=e.target.closest('a.nl');if(nl){e.preventDefault();const t=D.notes.find(x=>x.id===nl.dataset.nid);if(t)openNote(t.id);return}
+ const cb=e.target.closest('.cb');if(cb){cb.parentNode.classList.toggle('on');onEdit();return}
+ const t=e.target.closest('button,[data-go]');if(!t)return;const d=t.dataset;
+ if(d.go){if(S.ed)closeNote();$('#sheet').hidden=true;S.ed=null;S.view=d.go;S.col=null;render();window.scrollTo(0,0)}
+ else if(d.open)openNote(d.open);
+ else if(d.col){S.col=d.col;S.topic='';render()}
+ else if(d.day){S.day=d.day;render();window.scrollTo(0,0)}
+ else if(d.rmp!==undefined){cur().photos.splice(+d.rmp,1);save();openNote(S.ed)}
+ else if(d.x){$('#xo').value=d.x==='json'?JSON.stringify(D,null,1):window._md}
+ else if(d.fmt)fx(d.fmt);
+ else if(d.topic!==undefined){S.topic=d.topic;render()}
+ else if(d.rp){const n=cur(),t=new Date();if(d.rp==='later')t.setHours(t.getHours()+3);else{t.setDate(t.getDate()+(d.rp==='tom'?1:7));t.setHours(9,0,0,0)}n.remind=t.toISOString();n.fired=false;n.done=false;save();try{Notification.requestPermission()}catch(x){}openNote(n.id)}
+ else if(d.color!==undefined){const n=cur();n.color=d.color;save();openNote(n.id)}
+ else if(d.q!==undefined){S.q=d.q;S.f={};S.view='search';if(S.ed)closeNote();$('#sheet').hidden=true;render();window.scrollTo(0,0)}
+ else if(d.f){if(d.f==='days')S.f.days=S.f.days==+d.v?0:+d.v;else S.f[d.f]=!S.f[d.f];render()}
+ else if(d.pick){const t=D.notes.find(x=>x.id===d.pick),s=getSelection(),r=PK.r;$('#eb').focus();s.removeAllRanges();r.deleteContents();s.addRange(r);ex('insertHTML','<a class="nl" data-nid="'+t.id+'" contenteditable="false">'+esc(title(t))+'</a>&nbsp;');$('#pick').remove();onEdit()}
+ else if(d.act){const a=d.act,n=S.ed&&cur();
+  if(a==='theme'){const dark=getComputedStyle(document.documentElement).colorScheme==='dark';theme=dark?'light':'dark';document.documentElement.dataset.theme=theme;try{localStorage.setItem('nbTheme',theme)}catch(x){}}
+  else if(a==='export')exportSheet();
+  else if(a==='capture'){const v=$('#cap').value.trim();if(!v&&!S.photos.length)return;newNote({body:v,photos:S.photos});S.photos=[];S.cap='';render()}
+  else if(a==='close')closeNote();
+  else if(a==='sugmove'){const x=D.notes.find(y=>y.id===d.id);x.col=d.c;x.topic=d.t||null;save();if(S.ed)openNote(x.id);else render()}
+  else if(a==='ccol'){const c=D.cols.find(x=>x.id===S.col),k=c.color||'c'+(D.cols.indexOf(c)%5+1);c.color='c'+((+k.slice(1))%5+1);save();render()}
+  else if(a==='upnow'){n.upnow=!n.upnow;save();openNote(n.id)}
+  else if(a==='conn'){const x=D.notes.find(q=>q.id===d.a),y=D.notes.find(q=>q.id===d.b);(x.links=x.links||[]).push(y.id);(y.links=y.links||[]).push(x.id);save();render()}
+  else if(a==='nocon'){const x=D.notes.find(q=>q.id===d.a);(x.hide=x.hide||[]).push(d.b);save();render()}
+  else if(a==='fab'){if(S.ed)closeNote();quick(false)}
+  else if(a==='fabck'){if(S.ed)closeNote();quick(true)}
+  else if(a==='pclose')$('#pick').remove();
+  else if(a==='undo'||a==='restore'){const i=D.trash.findIndex(x=>x.id===d.id);if(i>-1){const x=D.trash.splice(i,1)[0];delete x.deletedAt;D.notes.push(x);save();$('#snack').hidden=true;render()}}
+  else if(a==='purge'){D.trash=D.trash.filter(x=>x.id!==d.id);save();render()}
+  else if(a==='rclear'){n.remind=null;n.fired=false;save();openNote(n.id)}
+  else if(a==='dismiss'){const now=new Date().toISOString();D.notes.forEach(x=>{if(x.remind&&!x.done&&x.remind<=now)x.done=true});save();$('#toast').hidden=true;render()}
+  else if(a==='pin'){n.pinned=!n.pinned;save();openNote(n.id)}
+  else if(a==='arch'){n.archived=!n.archived;save();closeNote()}
+  else if(a==='conv'){n.type=n.type==='journal'?'note':'journal';save();openNote(n.id)}
+  else if(a==='del'){D.notes=D.notes.filter(x=>x!==n);n.deletedAt=new Date().toISOString();D.trash.unshift(n);save();closeNote();snack('Moved to Trash',n.id)}
+  else if(a==='jnew'){const x=new Date(),iso=new Date(S.day+'T'+x.toTimeString().slice(0,8)).toISOString();openNote(newNote({type:'journal',created:iso}).id)}
+  else if(a==='prev'||a==='next'){const x=new Date(S.day+'T12:00');x.setDate(x.getDate()+(a==='next'?1:-1));S.day=dk(x);render()}
+  else if(a==='tday'){S.day=today();render()}
+  else if(a==='back'){S.col=null;render()}
+  else if(a==='cnew')openNote(newNote({col:S.col}).id);
+  else if(a==='addcol'){const v=prompt('Notebook name');if(v&&v.trim()){D.cols.push({id:uid(),name:v.trim()});save();render()}}
+  else if(a==='ren'){const c=D.cols.find(x=>x.id===S.col),v=prompt('New name',c.name);if(v&&v.trim()){c.name=v.trim();save();render()}}
+  else if(a==='delcol'){if(confirm('Delete this notebook? Its notes go back to the Inbox.')){D.notes.forEach(x=>{if(x.col===S.col)x.col=null});D.cols=D.cols.filter(c=>c.id!==S.col);S.col=null;save();render()}}
+  else if(a==='copyx'){const o=$('#xo');o.select();try{document.execCommand('copy')}catch(x){}}
+  else if(a==='restore'){try{const j=JSON.parse($('#xi').value);if(!j.notes||!j.cols)throw 0;if(confirm('Replace everything with this backup?')){D=j;D.trash=D.trash||[];save();closeNote()}}catch(x){alert('That is not a valid backup.')}}
+ }
+});
+document.addEventListener('input',e=>{
+ const id=e.target.id;
+ if(S.ed&&(id==='et'||id==='eb')){cur().title=$('#et').value;onEdit();if(id==='eb')linkCheck()}
+ else if(id==='pq')pickList(e.target.value);
+ else if(id==='cap'){S.cap=e.target.value;capInfo()}
+ else if(id==='q'){S.q=e.target.value;$('#res').innerHTML=resHTML()}
+});
+document.addEventListener('change',e=>{
+ const id=e.target.id;
+ if(id==='ec'){cur().col=e.target.value||null;cur().topic=null;save();openNote(S.ed)}
+ else if(id==='etp'){cur().topic=e.target.value.trim()||null;save()}
+ else if(id==='fcol'){S.f.col=e.target.value;render()}
+ else if(id==='er'){const n=cur();n.remind=e.target.value?new Date(e.target.value).toISOString():null;n.fired=false;n.done=false;save();try{Notification.requestPermission()}catch(x){}}
+ else if(id==='dayin'&&e.target.value){S.day=e.target.value;render()}
+ else if(id==='eimg'&&e.target.files[0])shrink(e.target.files[0],u=>{cur().photos.push(u);save();openNote(S.ed)});
+ else if(id==='capimg'&&e.target.files[0])shrink(e.target.files[0],u=>{S.photos.push(u);$('#capph').textContent=S.photos.length+' photo attached'});
+});
+const lv=iso=>{const d=new Date(iso);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+const dueN=()=>D.notes.filter(n=>n.remind&&!n.done&&!n.archived&&n.remind<=new Date().toISOString()).length;
+const ex=(c,v)=>document.execCommand(c,false,v);
+function onEdit(){const n=cur(),b=$('#eb');if(!n||!b)return;n.upd=new Date().toISOString();n.html=b.innerHTML;n.body=b.innerText.replace(/\u200b/g,'');$('#sv').textContent='Saving…';clearTimeout(tm);tm=setTimeout(save,400);renderRefs()}
+function fx(c){$('#eb').focus();
+ if(c==='hl')ex('hiliteColor',/255, 214/.test(document.queryCommandValue('hiliteColor'))?'transparent':'rgba(255,214,10,.45)');
+ else if(c==='sm')ex('fontSize','2');else if(c==='md')ex('fontSize','3');else if(c==='lg')ex('fontSize','5');
+ else if(c==='h')ex('formatBlock',document.queryCommandValue('formatBlock')==='h3'?'div':'h3');
+ else if(c==='ul')ex('insertUnorderedList');
+ else if(c==='ck')ex('insertHTML','<div class="ck"><i class="cb" contenteditable="false"></i>\u200b</div>');
+ else ex(c);
+ onEdit()}
+document.addEventListener('mousedown',e=>{if(e.target.closest('.tb'))e.preventDefault()});
+document.addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('#eb')){e.preventDefault();ex('insertText',(e.clipboardData||window.clipboardData).getData('text/plain'))}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.id!=='eb')return;const s=getSelection();if(!s.rangeCount)return;let k=s.anchorNode;k=k.nodeType===3?k.parentNode:k;k=k.closest&&k.closest('.ck');if(!k)return;e.preventDefault();
+ const empty=!k.textContent.replace(/\u200b/g,'').trim(),nx=document.createElement('div');
+ if(empty){nx.innerHTML='<br>';k.replaceWith(nx)}else{nx.className='ck';nx.innerHTML='<i class="cb" contenteditable="false"></i>\u200b';k.after(nx)}
+ const r=document.createRange();r.selectNodeContents(nx);r.collapse(empty);s.removeAllRanges();s.addRange(r);onEdit()});
+function chk(){const now=new Date().toISOString(),d=D.notes.filter(n=>n.remind&&!n.done&&!n.fired&&!n.archived&&n.remind<=now);if(!d.length)return;
+ d.forEach(n=>{n.fired=true;try{new Notification('Reminder',{body:title(n)})}catch(x){}});save();
+ const t=$('#toast');t.hidden=false;t.innerHTML=`<b>Reminder</b><div>${esc(title(d[0]))}${d.length>1?' and '+(d.length-1)+' more':''}</div><div class="bar"><button class="btn" data-open="${d[0].id}">Open</button><button class="btn2" data-act="dismiss">Done</button></div>`;
+ if(!S.ed)render()}
+setInterval(chk,15000);setTimeout(chk,400);
+const BK="gen,genesis|1ms,1moosese;ex,exod,exodus|2ms,2moosese;lev,leviticus|3ms,3moosese;num,numbers|4ms,4moosese;deut,deuteronomy|5ms,5moosese;josh,joshua|jos,joosua;judg,judges|kg,kohtunikud;ruth|rt,rutt;1sam,1samuel|1sm,1saamueli;2sam,2samuel|2sm,2saamueli;1kings,1ki|1kn,1kuningate;2kings,2ki|2kn,2kuningate;1chron,1chronicles|1aj,1ajaraamat;2chron,2chronicles|2aj,2ajaraamat;ezra|esr,esra;neh,nehemiah|nehemja;esther|est,ester;job|ii,iiob;ps,psalm,psalms|l,laul,laulud;prov,proverbs|õp,õpetussõnad,opetussonad;eccl,ecclesiastes|kgj,koguja;song,solomon|ül,ülemlaul,ulemlaul;isa,isaiah|jes,jesaja;jer,jeremiah|jeremija;lam,lamentations|nl,nutulaulud;ezek,ezekiel|hs,hesekiel;dan,daniel|tn,taaniel;hos,hosea|ho,hoosea;joel|jl;amos|am,aamos;obad,obadiah|ob,obadja;jonah,jon|joona;mic,micah|mi,miika;nah,nahum|nh;hab,habakkuk|ha,habakuk;zeph,zephaniah|sf,sefanja;hag,haggai|hg;zech,zechariah|sk,sakarja;mal,malachi|ml,malaki;matt,matthew,mt|matteuse;mark,mk|mr,markuse;luke,lk|luuka;john,jn|jh,johannese;acts|ap,apostlite,teod;rom,romans|rm,roomlastele;1cor,1corinthians|1ko,1korintlastele;2cor,2corinthians|2ko,2korintlastele;gal,galatians|gl,galaatlastele;eph,ephesians|ef,efeslastele;phil,philippians|fl,filiplastele;col,colossians|kl,koloslastele;1thess,1thessalonians|1ts,1tessalooniklastele;2thess,2thessalonians|2ts,2tessalooniklastele;1tim,1timothy|1tm,1timoteosele;2tim,2timothy|2tm,2timoteosele;titus|tt,tiitusele;philem,philemon|fm,filemonile;heb,hebrews|hb,heebrealastele;jas,james|jk,jakoobuse;1pet,1peter|1pt,1peetruse;2pet,2peter|2pt,2peetruse;1john,1jn|1jh,1johannese;2john,2jn|2jh,2johannese;3john,3jn|3jh,3johannese;jude|jd,juuda;rev,revelation|ilm,ilmutus";
+const AL={};BK.split(';').forEach((s,i)=>{const p=s.split('|');p[0].split(',').forEach(a=>AL[a]=[i+1,'E']);p[1].split(',').forEach(a=>AL[a]=[i+1,'ES'])});
+function findBook(w){w=w.toLowerCase().replace(/[.\s]/g,'');if(AL[w])return AL[w];if(w.length<4)return null;for(const a in AL)if((a.length>=4&&(a.startsWith(w)||w.startsWith(a)))||(/^\d/.test(a)&&w.startsWith(a)))return AL[a];return null}
+const BLANG='ST';
+function jwUrl(l,c){return /Android|iPhone|iPad/.test(navigator.userAgent)?'jwlibrary:///finder?bible='+c+'&wtlocale='+BLANG:'https://www.jw.org/finder?srcid=jwlshare&wtlocale='+BLANG+'&prefer=lang&bible='+c}
+function _jwOld(l,c){const q='finder?srcid=jwlshare&wtlocale='+BLANG+'&prefer=lang&bible='+c,ua=navigator.userAgent,web='https://www.jw.org/'+q;if(/Android/.test(ua))return 'intent:///'+q+'#Intent;scheme=jwlibrary;package=org.jw.jwlibrary.mobile;S.browser_fallback_url='+encodeURIComponent(web)+';end';if(/iPhone|iPad|Macintosh/.test(ua))return 'jwlibrary:///'+q;return web}
+function refsIn(t){const out=[],seen={},pad=(x,n)=>String(x).padStart(n,'0'),re=/([1-3]\.?\s?)?(\p{L}+)\.?\s*(\d{1,3}):(\d{1,3})(?:[-–](\d{1,3}))?/gu;let m;while((m=re.exec(t||''))){let b=findBook((m[1]||'')+m[2]),lab=m[0];if(!b){b=findBook(m[2]);lab=lab.replace(m[1]||'','')}if(!b)continue;const key=b[0]+':'+m[3]+':'+m[4];if(seen[key])continue;seen[key]=1;const c=pad(b[0],2)+pad(m[3],3)+pad(m[4],3),c2=m[5]?pad(b[0],2)+pad(m[3],3)+pad(m[5],3):'';out.push({key,label:lab.trim(),url:jwUrl(b[1],c+(c2?'-'+c2:''))})}return out}
+const tagsIn=t=>[...new Set([...(t||'').matchAll(/(?:^|\s)#([\p{L}\d_-]{2,})/gu)].map(m=>m[1].toLowerCase()))];
+function results(){const f=S.f,q=S.q.trim(),lo=q.toLowerCase(),rs=refsIn(q);return D.notes.filter(n=>{if(f.check&&!/class="ck/.test(n.html||''))return false;if(f.rem&&!(n.remind&&!n.done))return false;if(f.photo&&!n.photos.length)return false;if(f.jr&&n.type!=='journal')return false;if(f.col&&n.col!==f.col)return false;if(f.days&&new Date(n.created)<Date.now()-f.days*864e5)return false;if(!q)return true;if(rs.length)return refsIn(n.body).some(x=>rs.some(y=>y.key===x.key));return (title(n)+' '+n.body).toLowerCase().includes(lo)})}
+function resHTML(){const q=S.q.trim();if(!q&&!Object.values(S.f).some(Boolean)){const t={};D.notes.forEach(n=>tagsIn(n.body).forEach(x=>t[x]=(t[x]||0)+1));const k=Object.keys(t);return (k.length?'<h2>Tags</h2><div class="chips">'+k.map(x=>`<button class="fc" data-q="#${esc(x)}">#${esc(x)} ${t[x]}</button>`).join('')+'</div>':'')+'<div class="empty">Search text, a Bible reference such as Joona 1:17, or a #tag. Filters narrow the results.</div>'}return list(results(),'No notes match.')}
+function searchView(){const f=S.f,c=(k,l,v)=>`<button class="fc ${(v?f[k]==v:f[k])?'on':''}" data-f="${k}"${v?` data-v="${v}"`:''}>${l}</button>`;return topbar()+`<h1>Search</h1><input class="f" id="q" placeholder="Text, Bible reference or #tag" value="${esc(S.q)}"><div class="chips">${c('check','Checklists')}${c('rem','Reminders')}${c('photo','Photos')}${c('jr','Journal')}${c('days','7 days',7)}${c('days','30 days',30)}</div><select class="f" id="fcol" aria-label="Collection"><option value="">All collections</option>${D.cols.map(x=>`<option value="${x.id}" ${f.col===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select><div id="res">${resHTML()}</div>`}
+function _oldHome(){const g=new Date().getHours(),hi=g<12?'Good morning':g<18?'Good afternoon':'Good evening',eod=new Date();eod.setHours(23,59,59,999);
+ const due=live().filter(n=>n.remind&&!n.done&&n.remind<=eod.toISOString()).sort((a,b)=>a.remind.localeCompare(b.remind)),pin=live().filter(n=>n.pinned),ib=inbox(),rec=sortN(live().filter(n=>!n.pinned)).slice(0,5),up=live().filter(n=>n.remind&&!n.done).length;
+ const hd=(t,go)=>`<div class="row"><h2>${t}</h2><button class="ib" data-go="${go}">See all ›</button></div>`;
+ return topbar()+`<h1>${hi}</h1><div class="cap"><textarea id="cap" placeholder="Capture a thought…" aria-label="Quick capture"></textarea><div class="row"><span><label class="btn2" style="cursor:pointer">Add photo<input type="file" accept="image/*" id="capimg" hidden></label> <span class="saved" id="capph"></span></span><button class="btn" data-act="capture">Save to Inbox</button></div></div><div class="tiles"><button class="tile" data-go="reminders"><b>${up}</b><span>reminders</span></button><button class="tile" data-go="journal"><b>${live().filter(n=>n.type==='journal'&&dk(n.created)===today()).length}</b><span>journal entries today</span></button></div>`+
+ (due.length?hd('Today','reminders')+due.map(card).join(''):'')+(pin.length?`<h2>Pinned</h2><div class="grid">${sortN(pin).map(card).join('')}</div>`:'')+(ib.length?hd('Inbox ('+ib.length+')','inbox')+sortN(ib).slice(0,3).map(card).join(''):'')+`<h2>Recent</h2>`+list(rec,'Nothing yet. Tap + to write your first note.')}
+function _oldRefs(){const n=cur(),el=$('#refs');if(!n||!el)return;const bl=D.notes.filter(x=>x.id!==n.id&&(x.html||'').includes('data-nid="'+n.id+'"'));el.innerHTML=[...refsIn(n.body).map(r=>`<span class="chip"><button data-q="${esc(r.label)}" title="Notes mentioning this">${esc(r.label)}</button><a href="${r.url}" target="_blank" rel="noopener" title="Open in JW Library">JW</a></span>`),...tagsIn(n.body).map(t=>`<span class="chip"><button data-q="#${esc(t)}">#${esc(t)}</button></span>`),...bl.map(x=>`<span class="chip"><button data-open="${x.id}">← ${esc(title(x))}</button></span>`)].join('')}
+let PK;
+function linkCheck(){const s=getSelection();if(!s.rangeCount)return;const nd=s.anchorNode,o=s.anchorOffset;if(nd.nodeType!==3||nd.textContent.slice(o-2,o)!=='[[')return;const r=document.createRange();r.setStart(nd,o-2);r.setEnd(nd,o);PK={r};let p=$('#pick');if(!p){p=document.createElement('div');p.id='pick';$('#sheet').appendChild(p)}p.innerHTML='<input class="f" id="pq" placeholder="Link to which note?"><div id="pl"></div><div class="bar"><button class="btn2" data-act="pclose">Cancel</button></div>';pickList('');$('#pq').focus()}
+function pickList(q){const l=sortN(D.notes.filter(n=>n.id!==S.ed&&(title(n)+' '+n.body).toLowerCase().includes(q.toLowerCase()))).slice(0,8);$('#pl').innerHTML=l.map(n=>`<button class="item" data-pick="${n.id}"><div class="t">${esc(title(n))}</div></button>`).join('')||'<div class="empty">No notes found.</div>'}
+let sk;function snack(msg,id){const s=$('#snack');s.hidden=false;s.innerHTML=`<span>${msg}</span><button class="btn2" data-act="undo" data-id="${id}">Undo</button>`;clearTimeout(sk);sk=setTimeout(()=>s.hidden=true,7000)}
+function quick(ck){const o={};if(S.view==='library'&&S.col){o.col=S.col;if(S.topic&&S.topic!=='-')o.topic=S.topic}if(S.view==='journal'){o.type='journal';o.created=new Date(S.day+'T'+new Date().toTimeString().slice(0,8)).toISOString()}if(ck)o.html='<div class="ck"><i class="cb" contenteditable="false"></i>\u200b</div>';openNote(newNote(o).id,true)}
+const STOP=new Set('ning kuid siis oleks olnud kõik midagi pole veel kuna nagu mida kelle seda selle need neid minu mulle meie teie sest kuigi millal samuti väga ainult juba alati jälle tuleb saab võib peab praegu that this with have from your will would there their what when which about been were they them then than into also some just like more very only'.split(' '));
+function feat(n){const t=(n.title||'')+' '+(n.body||''),ws={};for(const m of t.toLowerCase().matchAll(/\p{L}{4,}/gu)){const w=m[0];if(STOP.has(w))continue;const s=w.slice(0,5);if(!ws[s])ws[s]=w}return{refs:refsIn(t),tags:tagsIn(t),ws}}
+function related(n,lim=3){const all=D.notes.filter(x=>x.id!==n.id&&x.type!=='journal');if(!all.length||n.type==='journal')return[];const N=all.length+1,fa=feat(n),F=all.map(x=>({n:x,f:feat(x)})),df={};F.forEach(o=>Object.keys(o.f.ws).forEach(s=>df[s]=(df[s]||0)+1));Object.keys(fa.ws).forEach(s=>df[s]=(df[s]||0)+1);
+ const cap=Math.max(3,N*.25),rk=new Set(fa.refs.map(r=>r.key)),ck=new Set(fa.refs.map(r=>r.key.split(':').slice(0,2).join(':'))),out=[];
+ F.forEach(({n:x,f})=>{if((n.hide||[]).includes(x.id)||(x.hide||[]).includes(n.id))return;let sc=0;const why=[];f.refs.forEach(r=>{if(rk.has(r.key)){sc+=5;why.push(r.label)}else if(ck.has(r.key.split(':').slice(0,2).join(':'))){sc+=2.5;why.push(r.label)}});f.tags.forEach(t=>{if(fa.tags.includes(t)){sc+=4;why.push('#'+t)}});
+  const sh=Object.keys(f.ws).filter(s=>fa.ws[s]&&df[s]<=cap);let w=0;sh.forEach(s=>w+=1+Math.log(N/df[s]));if(sh.length>=2){sc+=w;if(!why.length)why.push(sh.slice(0,2).map(s=>f.ws[s]).join(', '))}
+  if((n.links||[]).includes(x.id)||(x.links||[]).includes(n.id)){sc+=50;why.unshift('linked')}if(sc>=5)out.push({n:x,sc,why:why[0]||''})});
+ return out.sort((a,b)=>b.sc-a.sc).slice(0,lim)}
+function chipRT(n){return [...refsIn(n.body).map(r=>`<span class="chip"><button data-q="${esc(r.label)}" title="Notes mentioning this">${esc(r.label)}</button><a href="${r.url}" target="_blank" rel="noopener" title="Open in JW Library">JW</a></span>`),...tagsIn(n.body).map(t=>`<span class="chip"><button data-q="#${esc(t)}">#${esc(t)}</button></span>`)].join('')}
+function relHTML(n){const rl=related(n);return rl.length?'<div class="saved" style="width:100%">Related notes</div>'+rl.map(x=>`<span class="chip"><button data-open="${x.n.id}" title="${esc(x.why)}">${esc(title(x.n))}<small>${esc(x.why)}</small></button></span>`).join(''):''}
+function renderRefs(){const n=cur(),el=$('#refs');if(!n||!el)return;const bl=D.notes.filter(x=>x.id!==n.id&&(x.html||'').includes('data-nid="'+n.id+'"'));el.innerHTML=chipRT(n)+bl.map(x=>`<span class="chip"><button data-open="${x.id}">← ${esc(title(x))}</button></span>`).join('')+relHTML(n)+sugHTML(n)}
+function capInfo(){const t=$('#cap');if(!t)return;let el=$('#capinfo');if(!el){el=document.createElement('div');el.id='capinfo';el.className='refs';t.after(el)}const n={id:'',title:'',body:t.value};el.innerHTML=t.value.trim()?chipRT(n)+relHTML(n):''}
+const topics=id=>[...new Set(D.notes.filter(n=>n.col===id&&n.topic).map(n=>n.topic))].sort();
+function suggest(n){if(n.col)return null;const rl=related(n,5).filter(r=>r.n.col);if(!rl.length)return null;const t={};rl.forEach(r=>t[r.n.col]=(t[r.n.col]||0)+r.sc);const c=Object.keys(t).sort((a,b)=>t[b]-t[a])[0],tt={};rl.filter(r=>r.n.col===c&&r.n.topic).forEach(r=>tt[r.n.topic]=(tt[r.n.topic]||0)+r.sc);return{c,t:Object.keys(tt).sort((a,b)=>tt[b]-tt[a])[0]||''}}
+function sugHTML(n){const s=suggest(n);if(!s)return '';return `<div class="saved sug" style="width:100%">Seems to belong in <b>${esc(colName(s.c))}</b>${s.t?' › '+esc(s.t):''} <button class="btn2" data-act="sugmove" data-id="${n.id}" data-c="${s.c}" data-t="${esc(s.t)}">Move</button></div>`}
+function inboxView(){const l=sortN(inbox());return topbar()+'<h1>Inbox</h1>'+(l.length?l.map(n=>card(n)+sugHTML(n)).join(''):'<div class="empty">Inbox is clear. Everything is organized.</div>')}
+function lastUp(id){return D.notes.filter(n=>n.col===id).map(n=>n.upd||n.created).sort().pop()||''}
+function libView(){
+ if(S.col){const c=D.cols.find(x=>x.id===S.col);if(!c){S.col=null;return libView()}
+  const ns=live().filter(n=>n.col===c.id),tp=topics(c.id),sel=S.topic||'',shown=sel==='-'?ns.filter(n=>!n.topic):sel?ns.filter(n=>n.topic===sel):ns,ch=(v,l)=>`<button class="fc ${sel===v?'on':''}" data-topic="${esc(v)}">${esc(l)}</button>`,seen={};
+  ns.forEach(n=>related(n,3).forEach(r=>{if(r.n.col&&r.n.col!==c.id&&(!seen[r.n.id]||seen[r.n.id].sc<r.sc))seen[r.n.id]=r}));const rl=Object.values(seen).sort((a,b)=>b.sc-a.sc).slice(0,3);
+  return topbar()+`<button class="ib" data-go="library">‹ Notebooks</button><h1>${esc(c.name)}</h1>`+(tp.length?`<div class="chips">${ch('','All '+ns.length)}${tp.map(t=>ch(t,t+' '+ns.filter(n=>n.topic===t).length)).join('')}${ns.some(n=>!n.topic)?ch('-','No topic'):''}</div>`:'')+list(shown,'Nothing here yet. Tap + to write a note.')+(rl.length?'<h2>Related from other notebooks</h2>'+rl.map(r=>`<button class="item" data-open="${r.n.id}"><div class="t">${esc(title(r.n))}</div><div class="m">${esc(colName(r.n.col))}${r.n.topic?' › '+esc(r.n.topic):''} · ${esc(r.why)}</div></button>`).join(''):'')+`<div class="bar"><button class="btn2" data-act="ren">Rename</button><button class="btn2" data-act="ccol">Colour</button><button class="btn2 danger" data-act="delcol">Delete notebook</button></div>`}
+ const sh=D.cols.map((c,i)=>{const k=live().filter(n=>n.col===c.id).length,lu=lastUp(c.id);return `<button class="cover ${c.color||'c'+(i%5+1)}" data-col="${c.id}"><div class="serif cn">${esc(c.name)}</div><div class="m">${k} note${k===1?'':'s'}${lu?' · '+fmt(lu):''}</div></button>`}).join('');
+ return topbar()+`<h1>Notebooks</h1><div class="shelf">${sh}<button class="cover add" data-act="addcol">+ New notebook</button></div><div class="bar"><button class="btn2" data-go="inbox">Inbox (${inbox().length})</button><button class="btn2" data-go="connections">Connections</button><button class="btn2" data-go="trash">Trash (${D.trash.length})</button></div>`}
+const upNow=()=>sortN(live().filter(n=>n.upnow||(n.html||'').includes('class="ck"')));
+const gk=n=>n.pinned?0:dk(n.created)===today()?1:Date.now()-new Date(n.created)<7*864e5?2:3,gn=['Pinned','Today','Previous 7 days','Earlier'];
+function glist(a){const s=sortN(a);return gn.map((t,i)=>{const x=s.filter(n=>gk(n)===i);return x.length?`<div class="gh">${t}</div>`+x.map(card).join(''):''}).join('')}
+function homeView(){const g=new Date().getHours(),hi=g<12?'Good morning':g<18?'Good afternoon':'Good evening',eod=new Date();eod.setHours(23,59,59,999);
+ const due=live().filter(n=>n.remind&&!n.done&&n.remind<=eod.toISOString()).sort((a,b)=>a.remind.localeCompare(b.remind)),un=upNow(),pin=sortN(live().filter(n=>n.pinned)),ib=inbox(),rec=sortN(live().filter(n=>!n.pinned)).slice(0,5);
+ const sec=(t,go)=>`<div class="row sh"><h2>${t}</h2>${go?`<button class="ib" data-go="${go}">See all ›</button>`:''}</div>`,lim=(a,k)=>a.slice(0,k).map(card).join('')+(a.length>k?`<div class="saved">+${a.length-k} more</div>`:'');
+ return topbar()+`<h1>${hi}</h1><div class="cap"><textarea id="cap" placeholder="Capture a thought…" aria-label="Quick capture"></textarea><div class="row"><span><label class="btn2" style="cursor:pointer">Add photo<input type="file" accept="image/*" id="capimg" hidden></label> <span class="saved" id="capph"></span></span><button class="btn" data-act="capture">Save to Inbox</button></div></div>`+
+ (ib.length?`<div class="bar"><button class="btn2" data-go="inbox">Inbox · ${ib.length} to sort</button></div>`:'')+
+ (due.length?sec('Today','reminders')+lim(due,3):'')+(un.length?sec('Up Now','upnow')+lim(un,4):'')+
+ (pin.length?sec('Pinned')+'<div class="chips">'+pin.slice(0,6).map(n=>`<button class="fc" data-open="${n.id}">${esc(title(n))}</button>`).join('')+'</div>':'')+
+ sec('Recent')+(rec.length?rec.map(card).join(''):'<div class="empty">Nothing yet. Tap + to write your first note.</div>')}
+function connView(){const seen={};D.notes.forEach(n=>related(n,3).forEach(r=>{if(r.sc>=50)return;const k=[n.id,r.n.id].sort().join();if(!seen[k]||seen[k].sc<r.sc)seen[k]={a:n,b:r.n,sc:r.sc,why:r.why}}));const rows=Object.values(seen).sort((x,y)=>y.sc-x.sc).slice(0,12),nb=n=>colName(n.col)||'Inbox';
+ return topbar()+'<button class="ib" data-go="library">‹ Notebooks</button><h1>Connections</h1><p class="saved">The strongest links the app found between your notes. Connect the ones that matter. Rejected pairs stay hidden.</p>'+(rows.length?rows.map(o=>`<div class="item"><div class="t">${esc(title(o.a))} ↔ ${esc(title(o.b))}</div><div class="m">${esc(o.why)} · ${esc(nb(o.a))} / ${esc(nb(o.b))}</div><div class="bar"><button class="btn2" data-act="conn" data-a="${o.a.id}" data-b="${o.b.id}">Connect</button><button class="btn2" data-act="nocon" data-a="${o.a.id}" data-b="${o.b.id}">Not related</button></div></div>`).join(''):'<div class="empty">No new connections to review.</div>')}
+window.addEventListener('pagehide',()=>{clearTimeout(tm);if(S.ed)save()});
+render();
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
