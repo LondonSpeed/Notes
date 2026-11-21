@@ -69,6 +69,7 @@ div.body{padding:8px 0;overflow-wrap:anywhere}div.body h3{font:500 24px/1.25 New
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.fc{border:1px solid var(--line);border-radius:20px;padding:5px 12px;font-size:13px}.fc.on{background:var(--accbg);color:var(--acc);border-color:var(--acc)}
 .refs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;font-size:13px}.chip button,.chip a{padding:4px 11px;color:var(--acc);text-decoration:none}.chip a{border-left:1px solid var(--line);font-weight:600}
 a.nl{color:var(--acc);text-decoration:underline;cursor:pointer}
+a.bref{color:var(--acc);text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
 .item{padding:11px 2px}.item .s{-webkit-line-clamp:1}.th{float:right;width:44px;height:44px;object-fit:cover;border-radius:8px;margin-left:10px}
 .gh{font:500 13px Inter,sans-serif;color:var(--mute);margin:18px 0 2px}.sh h2{margin:20px 0 4px;font-size:19px}
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
@@ -227,7 +228,7 @@ function openNote(id,foc){S.ed=id;$('#toast').hidden=true;const n=D.notes.find(x
  <div class="bar"><select class="f" id="ety" style="width:auto" aria-label="Type"><option value="note" ${n.type==='note'?'selected':''}>Note</option><option value="keep" ${n.type==='keep'?'selected':''}>Keep</option><option value="journal" ${n.type==='journal'?'selected':''}>Journal</option></select>
  <select class="f nbsel" id="ec" style="width:auto" aria-label="Notebook"><option value="">Inbox (no notebook)</option>${D.cols.map(c=>`<option value="${c.id}" ${n.col===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><input class="f nbsel" id="etp" list="tpl" placeholder="Topic (optional)" value="${esc(n.topic||'')}" style="width:auto;max-width:190px" aria-label="Topic"><datalist id="tpl">${topics(n.col).map(t=>`<option value="${esc(t)}">`).join('')}</datalist></div>
  <div class="bar"><span class="ib" aria-label="Remind me" title="Remind me">${ic('bell')}</span><button class="btn2" data-rp="later">Later today</button><button class="btn2" data-rp="tom">Tomorrow morning</button><button class="btn2" data-rp="week">Next week</button></div><div class="bar"><label class="saved">Or pick <input type="datetime-local" class="f" id="er" style="width:auto" value="${n.remind?lv(n.remind):''}"></label><button class="btn2" data-act="rclear">Clear reminder</button></div><div class="bar" role="group" aria-label="Colour">${['','c1','c2','c3','c4','c5'].map(c=>`<button class="dot ${c}${(n.color||'')===c?' on':''}" data-color="${c}" aria-label="Colour ${c||'none'}"></button>`).join('')}</div><div class="bar acts"><button class="ib ${n.upnow?'tg':''}" data-act="upnow" aria-label="Up Now" title="Up Now">${ic('flag')}</button><button class="ib ${n.pinned?'tg':''}" data-act="pin" aria-label="Pin" title="Pin">${ic('pin')}</button><button class="ib ${n.archived?'tg':''}" data-act="arch" aria-label="Archive" title="Archive">${ic('arch')}</button><button class="ib danger" data-act="del" aria-label="Delete" title="Delete">${ic('trash')}</button></div></div>`;
- $('#eb').innerHTML=n.html||esc(n.body).replace(/\n/g,'<br>');renderRefs();
+ $('#eb').innerHTML=n.html||esc(n.body).replace(/\n/g,'<br>');linkify();renderRefs();
  if(foc){const b=$('#eb');b.focus();const r=document.createRange();r.selectNodeContents(b);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r)}
 }
 const cur=()=>D.notes.find(x=>x.id===S.ed);
@@ -241,9 +242,11 @@ function exportSheet(){const sh=$('#sheet');sh.hidden=false;sh.className='sheet'
  <h2>Copy and paste</h2><p class="saved">Select all and copy, then paste into a file on your device. JSON includes photos and can be restored below. Markdown has text only.</p>
  <div class="bar"><button class="btn2" data-x="json">JSON (full backup)</button><button class="btn2" data-x="md">Markdown</button></div>
  <textarea class="x" id="xo" readonly></textarea><div class="bar"><button class="btn" data-act="copyx">Copy</button></div>
+ <h2>Bible language</h2><p class="saved">The language JW Library opens verses in. Links in a note update the next time you open it.</p><div class="bar"><select class="f" id="blang" style="width:auto" aria-label="Bible language">${[['ST','Eesti'],['E','English'],['U','Русский'],['FI','Suomi'],['L','Lietuvių'],['X','Deutsch']].map(([c,l])=>`<option value="${c}" ${BLANG===c?'selected':''}>${l}</option>`).join('')}</select></div>
  <h2>Notifications</h2><div class="bar"><button class="btn2" data-act="ntest">Test notification</button><button class="btn2" data-act="nexact">Exact alarm setting</button></div><p class="saved" id="nout"></p><h2>Restore from JSON</h2><textarea class="x" id="xi" style="height:120px" placeholder="Paste a JSON backup here"></textarea><div class="bar"><button class="btn2 danger" data-act="restore">Replace my data</button></div></div>`;
  window._md=md;}
 document.addEventListener('click',e=>{
+ const br=e.target.closest('a.bref');if(br){e.preventDefault();const a=document.createElement('a');a.href=br.href;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();const eb=$('#eb');if(eb)eb.blur();return}
  const nl=e.target.closest('a.nl');if(nl){e.preventDefault();const t=D.notes.find(x=>x.id===nl.dataset.nid);if(t)openNote(t.id);return}
  const cb=e.target.closest('.cb');if(cb){cb.parentNode.classList.toggle('on');onEdit();return}
  const t=e.target.closest('button,[data-go]');if(!t)return;const d=t.dataset;
@@ -322,7 +325,18 @@ document.addEventListener('change',e=>{
 const lv=iso=>{const d=new Date(iso);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
 const dueN=()=>D.notes.filter(n=>n.remind&&!n.done&&!n.archived&&n.remind<=new Date().toISOString()).length;
 const ex=(c,v)=>document.execCommand(c,false,v);
-function onEdit(){const n=cur(),b=$('#eb');if(!n||!b)return;n.upd=new Date().toISOString();n.html=b.innerHTML;n.body=b.innerText.replace(/\u200b/g,'');$('#sv').textContent='Saving…';clearTimeout(tm);tm=setTimeout(save,400);renderRefs()}
+function onEdit(){const n=cur(),b=$('#eb');if(!n||!b)return;n.upd=new Date().toISOString();n.html=b.innerHTML;n.body=b.innerText.replace(/\u200b/g,'');$('#sv').textContent='Saving…';clearTimeout(tm);tm=setTimeout(save,400);renderRefs();clearTimeout(bt);bt=setTimeout(linkify,700)}
+let bt,BW=false;
+document.addEventListener('pointerdown',e=>{BW=document.activeElement===document.getElementById('eb')},true);
+function caretOff(b){const s=getSelection();if(!s.rangeCount||!b.contains(s.anchorNode))return -1;const r=document.createRange();r.selectNodeContents(b);r.setEnd(s.anchorNode,s.anchorOffset);return r.toString().length}
+function setCaret(b,off){const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT);let n,c=0;while((n=w.nextNode())){const l=n.nodeValue.length;if(c+l>=off){const r=document.createRange(),a=n.parentNode.closest&&n.parentNode.closest('a.bref');if(a&&c+l===off)r.setStartAfter(a);else r.setStart(n,off-c);r.collapse(true);const s=getSelection();s.removeAllRanges();s.addRange(r);return}c+=l}}
+function linkify(){const b=$('#eb');if(!b)return;const before=b.innerHTML,off=document.activeElement===b?caretOff(b):-1;
+ b.querySelectorAll('a.bref').forEach(a=>a.replaceWith(document.createTextNode(a.textContent)));b.normalize();
+ const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT,{acceptNode:x=>x.parentNode.closest('a')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}),L=[];let n;while((n=w.nextNode()))L.push(n);
+ L.forEach(n=>{const t=n.nodeValue,rs=refsIn(t,true);if(!rs.length)return;const f=document.createDocumentFragment();let p=0;rs.forEach(r=>{if(r.start<p)return;f.append(t.slice(p,r.start));const a=document.createElement('a');a.className='bref';a.href=r.url;a.textContent=t.slice(r.start,r.end);f.append(a);p=r.end});f.append(t.slice(p));n.replaceWith(f)});
+ if(off>=0)setCaret(b,off);
+ if(b.innerHTML===before)return;
+ const nt=cur();if(nt){nt.html=b.innerHTML;clearTimeout(tm);tm=setTimeout(save,400)}}
 function fx(c){$('#eb').focus();
  if(c==='hl')ex('hiliteColor',/255, 214/.test(document.queryCommandValue('hiliteColor'))?'transparent':'rgba(255,214,10,.45)');
  else if(c==='sm')ex('fontSize','2');else if(c==='md')ex('fontSize','3');else if(c==='lg')ex('fontSize','5');
@@ -348,15 +362,18 @@ const AL={},ALS={},PRE=[];const BR=BK.split(';').map(r=>r.split('|'));
 [0,1].forEach(side=>BR.forEach((p,i)=>p[side].split(',').forEach(a=>{const k=fold(nz(a));if(k){AL[k]=i+1;ALS[sq(k)]=i+1}})));
 Object.keys(AL).forEach(k=>{if(k.length>=3)PRE.push([sq(k),AL[k]])});
 function findBook(w){const k=fold(nz(w));if(!k)return 0;if(AL[k])return AL[k];const q=sq(k);if(ALS[q])return ALS[q];if(q.length<3)return 0;const bs=new Set(PRE.filter(x=>x[0].startsWith(q)).map(x=>x[1]));return bs.size===1?[...bs][0]:0}
-const BLANG='ST';
+let BLANG='ST';try{BLANG=localStorage.getItem('nbLang')||'ST'}catch(e){}
 function jwUrl(l,c){return /Android|iPhone|iPad/.test(navigator.userAgent)?'jwlibrary:///finder?bible='+c+'&wtlocale='+BLANG:'https://www.jw.org/finder?srcid=jwlshare&wtlocale='+BLANG+'&prefer=lang&bible='+c}
 function _jwOld(l,c){const q='finder?srcid=jwlshare&wtlocale='+BLANG+'&prefer=lang&bible='+c,ua=navigator.userAgent,web='https://www.jw.org/'+q;if(/Android/.test(ua))return 'intent:///'+q+'#Intent;scheme=jwlibrary;package=org.jw.jwlibrary.mobile;S.browser_fallback_url='+encodeURIComponent(web)+';end';if(/iPhone|iPad|Macintosh/.test(ua))return 'jwlibrary:///'+q;return web}
-function refsIn(t){t=t||'';const out=[],seen={},pad=(x,n)=>String(x).padStart(n,'0'),re=/(\d{1,3}):(\d{1,3})(?:[-–](\d{1,3}))?/g;let m;
+function refsIn(t,all){t=t||'';const out=[],seen={},pad=(x,n)=>String(x).padStart(n,'0'),re=/(\d{1,3}):(\d{1,3})(?:[-–](\d{1,3}))?/g;let m,pb=0,pe=0,pn='';
  while((m=re.exec(t))){const base=Math.max(0,m.index-30),pre=t.slice(base,m.index).trimEnd(),tk=[...pre.matchAll(/\S+/g)];let b=0,st=0;
   for(let k=Math.min(3,tk.length);k>=1;k--){const x=tk[tk.length-k].index;if((b=findBook(pre.slice(x)))){st=x;break}}
-  if(!b)continue;const key=b+':'+m[1]+':'+m[2];if(seen[key])continue;seen[key]=1;
+  let inh=false;if(!b&&pb&&/^\s*;\s*$/.test(t.slice(pe,m.index))){b=pb;inh=true}
+  if(!b){pb=0;continue}
+  if(!inh)pn=t.slice(base+st,m.index).replace(/^[^\p{L}\p{N}]+/u,'').trim();pb=b;pe=m.index+m[0].length;
+  const key=b+':'+m[1]+':'+m[2];if(seen[key]&&!all)continue;seen[key]=1;
   const c=pad(b,3-1)+pad(m[1],3)+pad(m[2],3),c2=m[3]?pad(b,2)+pad(m[1],3)+pad(m[3],3):'';
-  out.push({key,label:t.slice(base+st,m.index+m[0].length).replace(/^[^\p{L}\p{N}]+/u,'').trim(),url:jwUrl(0,c+(c2?'-'+c2:''))})}
+  const raw=t.slice(base+st,m.index+m[0].length),lead=raw.match(/^[^\p{L}\p{N}]*/u)[0].length;out.push({key,start:inh?m.index:base+st+lead,end:m.index+m[0].length,label:inh?pn+' '+m[0]:raw.replace(/^[^\p{L}\p{N}]+/u,'').trim(),url:jwUrl(0,c+(c2?'-'+c2:''))})}
  return out}
 const tagsIn=t=>[...new Set([...(t||'').matchAll(/(?:^|\s)#([\p{L}\d_-]{2,})/gu)].map(m=>m[1].toLowerCase()))];
 function results(){const f=S.f,q=S.q.trim(),lo=q.toLowerCase(),rs=refsIn(q);return D.notes.filter(n=>{if(f.check&&!/class="ck/.test(n.html||''))return false;if(f.rem&&!(n.remind&&!n.done))return false;if(f.kp&&n.type!=='keep')return false;if(f.jr&&n.type!=='journal')return false;if(f.col&&n.col!==f.col)return false;if(f.days&&new Date(n.created)<Date.now()-f.days*864e5)return false;if(!q)return true;if(rs.length)return refsIn((n.title||'')+'\n'+n.body).some(x=>rs.some(y=>y.key===x.key));return (title(n)+' '+n.body).toLowerCase().includes(lo)})}
@@ -381,9 +398,9 @@ function related(n,lim=3){const all=D.notes.filter(x=>x.id!==n.id&&x.type!=='jou
   const sh=Object.keys(f.ws).filter(s=>fa.ws[s]&&df[s]<=cap);let w=0;sh.forEach(s=>w+=1+Math.log(N/df[s]));if(sh.length>=2){sc+=w;if(!why.length)why.push(sh.slice(0,2).map(s=>f.ws[s]).join(', '))}
   if((n.links||[]).includes(x.id)||(x.links||[]).includes(n.id)){sc+=50;why.unshift('linked')}if(sc>=5)out.push({n:x,sc,why:why[0]||''})});
  return out.sort((a,b)=>b.sc-a.sc).slice(0,lim)}
-function chipRT(n){const tx=(n.title||'')+'\n'+(n.body||'');return [...refsIn(tx).map(r=>`<span class="chip"><button data-q="${esc(r.label)}" title="Notes mentioning this">${esc(r.label)}</button><a href="${r.url}" target="_blank" rel="noopener" title="Open in JW Library">JW</a></span>`),...tagsIn(tx).map(t=>`<span class="chip"><button data-q="#${esc(t)}">#${esc(t)}</button></span>`)].join('')}
+function chipRT(n,ed){const tx=(n.title||'')+'\n'+(n.body||'');return [...refsIn(tx).map(r=>`<span class="chip"><button data-q="${esc(r.label)}" title="Notes mentioning this">${esc(r.label)}</button>${ed?'':`<a href="${r.url}" target="_blank" rel="noopener" title="Open in JW Library">JW</a>`}</span>`),...tagsIn(tx).map(t=>`<span class="chip"><button data-q="#${esc(t)}">#${esc(t)}</button></span>`)].join('')}
 function relHTML(n){const rl=related(n);return rl.length?'<div class="saved" style="width:100%">Related notes</div>'+rl.map(x=>`<span class="chip"><button data-open="${x.n.id}" title="${esc(x.why)}">${esc(title(x.n))}<small>${esc(x.why)}</small></button></span>`).join(''):''}
-function renderRefs(){const n=cur(),el=$('#refs');if(!n||!el)return;const bl=D.notes.filter(x=>x.id!==n.id&&(x.html||'').includes('data-nid="'+n.id+'"'));el.innerHTML=chipRT(n)+bl.map(x=>`<span class="chip"><button data-open="${x.id}">← ${esc(title(x))}</button></span>`).join('')+relHTML(n)+sugHTML(n)}
+function renderRefs(){const n=cur(),el=$('#refs');if(!n||!el)return;const bl=D.notes.filter(x=>x.id!==n.id&&(x.html||'').includes('data-nid="'+n.id+'"'));el.innerHTML=chipRT(n,1)+bl.map(x=>`<span class="chip"><button data-open="${x.id}">← ${esc(title(x))}</button></span>`).join('')+relHTML(n)+sugHTML(n)}
 function capInfo(){const t=$('#cap');if(!t)return;let el=$('#capinfo');if(!el){el=document.createElement('div');el.id='capinfo';el.className='refs';t.after(el)}const n={id:'',title:'',body:t.value};el.innerHTML=t.value.trim()?chipRT(n)+relHTML(n):''}
 const topics=id=>[...new Set(D.notes.filter(n=>n.col===id&&n.topic).map(n=>n.topic))].sort();
 function suggest(n){if(n.col)return null;const rl=related(n,5).filter(r=>r.n.col);if(!rl.length)return null;const t={};rl.forEach(r=>t[r.n.col]=(t[r.n.col]||0)+r.sc);const c=Object.keys(t).sort((a,b)=>t[b]-t[a])[0],tt={};rl.filter(r=>r.n.col===c&&r.n.topic).forEach(r=>tt[r.n.topic]=(tt[r.n.topic]||0)+r.sc);return{c,t:Object.keys(tt).sort((a,b)=>tt[b]-tt[a])[0]||''}}
@@ -493,7 +510,7 @@ function mergeData(j){let a=0,u=0;j.cols.forEach(c=>{if(!D.cols.some(x=>x.id===c
 async function impJson(inp){const m=$('#xmsg');try{const f=inp.files[0];if(!f)return;const j=JSON.parse(await f.text());if(!j.notes||!j.cols)throw new Error('This is not a Beroia backup file');
  if(S.imode==='merge'){const r=mergeData(j);m.textContent='Added '+r[0]+' new notes, updated '+r[1]+'.';render()}
  else if(confirm('Replace everything with this backup?')){D=j;D.trash=D.trash||[];save();closeNote()}}catch(e){m.textContent='Restore failed: '+(e&&e.message||e)}inp.value=''}
-document.addEventListener('change',e=>{if(e.target.id==='fjson')impJson(e.target);else if(e.target.id==='fmd')impMd(e.target)});
+document.addEventListener('change',e=>{if(e.target.id==='fjson')impJson(e.target);else if(e.target.id==='fmd')impMd(e.target);else if(e.target.id==='blang'){BLANG=e.target.value;try{localStorage.setItem('nbLang',BLANG)}catch(x){}}});
 async function nTest(){const o=$('#nout');if(!LN){o.textContent='Native notifications are only available in the Android app.';return}
  try{const p=await LN.checkPermissions(),x=LN.checkExactNotificationSetting?await LN.checkExactNotificationSetting():{};
  await LN.createChannel({id:'reminders',name:'Reminders',importance:4,vibration:true,visibility:1});
