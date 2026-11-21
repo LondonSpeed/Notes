@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Notebook</title>
+<title>Beroia</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f2f2f7"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png"><link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
@@ -174,7 +174,7 @@ function card(n){const t=title(n),b=n.title?(n.body||''):(n.body||'').split('\n'
  fl=[n.col?esc(colName(n.col))+(n.topic?' › '+esc(n.topic):''):'',n.upnow?'Up Now':'',n.type==='journal'?'Journal':'',due?'Reminder '+fmt(n.remind)+(n.remind<=new Date().toISOString()?' (due)':''):'',prog(n).replace(' · ',''),n.archived?'Archived':''].filter(Boolean).join(' · ');
  return `<button class="item nc ${n.color||''}" data-open="${n.id}"><div class="tx"><div class="t">${esc(t)}</div><div class="s"><span class="dt">${esc(fs(n.created))}</span>${pv?esc(pv):'<i>No additional text</i>'}</div>${fl?`<div class="m">${fl}</div>`:''}</div>${n.photos.length?`<img class="th" src="${n.photos[0]}" alt="">`:''}</button>`}
 const list=(a,msg)=>a.length>3?glist(a):a.length?sortN(a).map(card).join(''):`<div class="empty">${msg}</div>`;
-function topbar(){const dn=dueN();return `<div class="top"><span class="brand">Notebook</span><span><button class="ib" data-act="plan" aria-label="Bible reading plan" title="Bible reading plan">${ic('bible')}</button><button class="ib" data-go="reminders" aria-label="Reminders" title="Reminders">${ic('bell')}${dn?`<span class="bdg">${dn}</span>`:''}</button><button class="ib" data-act="theme" aria-label="Light or dark" title="Light / dark">${ic('moon')}</button><button class="ib" data-act="export" aria-label="Export and restore" title="Export / restore">${ic('down')}</button></span></div>`}
+function topbar(){const dn=dueN();return `<div class="top"><span class="brand">Beroia</span><span><button class="ib" data-act="plan" aria-label="Bible reading plan" title="Bible reading plan">${ic('bible')}</button><button class="ib" data-go="reminders" aria-label="Reminders" title="Reminders">${ic('bell')}${dn?`<span class="bdg">${dn}</span>`:''}</button><button class="ib" data-act="theme" aria-label="Light or dark" title="Light / dark">${ic('moon')}</button><button class="ib" data-act="export" aria-label="Export and restore" title="Export / restore">${ic('down')}</button></span></div>`}
 const views={
  home(){return homeView()},
  keep(){return keepView()},
