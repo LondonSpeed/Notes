@@ -137,6 +137,12 @@ nav button svg{width:24px;height:24px;display:block;margin:0 auto}
 .kc .m{color:var(--mute);font-size:12px;margin-top:6px}.kc .m .ic{width:14px;height:14px;display:inline;vertical-align:-2px}
 @media(min-width:860px){.kg{columns:3}nav button svg{margin:0}}
 #planov{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}#planov[hidden]{display:none}#planov iframe{flex:1;width:100%;border:0;background:var(--bg)}#planov .pb{padding:2px 6px}
+:root{--sat:env(safe-area-inset-top,0px);padding-top:var(--sat)}
+html.native{--sat:max(env(safe-area-inset-top,0px),32px)}
+.sheet{top:var(--sat);padding-top:0}
+.sheet .tools{top:8px;background:color-mix(in srgb,var(--bg) 92%,transparent)}
+#planov{padding-top:var(--sat)}
+#pick{top:var(--sat)}
 </style>
 </head>
 <body>
@@ -401,6 +407,7 @@ function homeView(){const g=new Date().getHours(),hi=g<12?'Good morning':g<18?'G
 function connView(){const seen={};D.notes.forEach(n=>related(n,3).forEach(r=>{if(r.sc>=50)return;const k=[n.id,r.n.id].sort().join();if(!seen[k]||seen[k].sc<r.sc)seen[k]={a:n,b:r.n,sc:r.sc,why:r.why}}));const rows=Object.values(seen).sort((x,y)=>y.sc-x.sc).slice(0,12),nb=n=>colName(n.col)||'Inbox';
  return topbar()+'<button class="ib" data-go="library">‹ Notebooks</button><h1>Connections</h1><p class="saved">The strongest links the app found between your notes. Connect the ones that matter. Rejected pairs stay hidden.</p>'+(rows.length?rows.map(o=>`<div class="item"><div class="t">${esc(title(o.a))} ↔ ${esc(title(o.b))}</div><div class="m">${esc(o.why)} · ${esc(nb(o.a))} / ${esc(nb(o.b))}</div><div class="bar"><button class="btn2" data-act="conn" data-a="${o.a.id}" data-b="${o.b.id}">Connect</button><button class="btn2" data-act="nocon" data-a="${o.a.id}" data-b="${o.b.id}">Not related</button></div></div>`).join(''):'<div class="empty">No new connections to review.</div>')}
 var rsig='',NERR='';
+if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())document.documentElement.classList.add('native');
 const LN=(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())?Capacitor.Plugins.LocalNotifications:null;
 const nid=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)%2e9+1};
 async function syncRem(){if(!LN)return;const l=D.notes.filter(n=>n.remind&&!n.done&&!n.archived&&new Date(n.remind)>new Date()),sig=l.map(n=>n.id+n.remind).join();if(sig===rsig)return;
