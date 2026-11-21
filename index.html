@@ -144,6 +144,14 @@ html.native{--sat:max(env(safe-area-inset-top,0px),32px)}
 .sheet .tools{top:8px;background:color-mix(in srgb,var(--bg) 92%,transparent)}
 #planov{padding-top:var(--sat)}
 #pick{top:var(--sat)}
+
+.hd{position:sticky;top:0;z-index:4;margin:-14px -18px 0;padding:8px 18px 4px;background:var(--bg)}
+.sheet.c1 .hd{background:color-mix(in srgb,#e6c74c 24%,var(--bg))}.sheet.c2 .hd{background:color-mix(in srgb,#6cc58a 24%,var(--bg))}.sheet.c3 .hd{background:color-mix(in srgb,#6a9ff0 24%,var(--bg))}.sheet.c4 .hd{background:color-mix(in srgb,#ee79a5 24%,var(--bg))}.sheet.c5 .hd{background:color-mix(in srgb,#a98af0 24%,var(--bg))}
+.hd .row{flex-wrap:nowrap}.hd .saved{flex:1;padding-left:6px}
+.hd .tools{position:static;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-bottom:0;padding:6px 0 4px;flex-wrap:wrap}
+.hd.off .tools{display:none}
+.hd .fmtb{font-weight:700;font-size:15px;letter-spacing:-.02em}
+.hd{border-bottom:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -221,9 +229,9 @@ $('#nav').innerHTML=items.map(([k,i,l])=>`<button data-go="${k}" class="${S.view
  if(S.view==='search'&&!S.q)$('#q').focus();if(S.view==='home'){const t=$('#cap');if(t&&S.cap)t.value=S.cap;capInfo()}
 }
 function openNote(id,foc){S.ed=id;$('#toast').hidden=true;const n=D.notes.find(x=>x.id===id);const sh=$('#sheet');sh.hidden=false;sh.className='sheet '+(n.color||'')+(n.type==='keep'?' keep':'');
- sh.innerHTML=`<div class="in"><div class="row"><button class="ib" data-act="close" aria-label="Back" title="Back">${ic('back')}</button><span class="saved" id="sv">Saved</span></div>
+ sh.innerHTML=`<div class="in"><div class="hd${TB?'':' off'}" id="hd"><div class="row"><button class="ib" data-act="close" aria-label="Back" title="Back">${ic('back')}</button><span class="saved" id="sv">Saved</span><button class="ib fmtb ${TB?'tg':''}" data-act="tools" aria-label="Text formatting" title="Text formatting">Aa</button></div><div class="tools" role="toolbar" aria-label="Text formatting"><button class="tb" data-fmt="bold" title="Bold"><b>B</b></button><button class="tb" data-fmt="italic" title="Italic"><i>I</i></button><button class="tb" data-fmt="underline" title="Underline"><u>U</u></button><button class="tb" data-fmt="strikeThrough" title="Strikethrough"><s>S</s></button><button class="tb" data-fmt="hl" title="Highlight" style="background:rgba(255,214,10,.45)">Highlight</button><button class="tb" data-fmt="sm" title="Smaller text">A−</button><button class="tb" data-fmt="md" title="Normal size">A</button><button class="tb" data-fmt="lg" title="Larger text">A+</button><button class="tb" data-fmt="h" title="Heading">Heading</button><button class="tb" data-fmt="ul" title="Bulleted list">• List</button><button class="tb" data-fmt="ck" title="Checklist">☐ Checklist</button><button class="tb" data-fmt="removeFormat" title="Clear formatting">Clear</button></div></div>
  <div class="m saved">${fmt(n.created)} ${n.type==='journal'?'<span class="pill">Journal</span>':''}</div>
- <input class="ttl" id="et" placeholder="Title" value="${esc(n.title)}"><div class="tools" role="toolbar" aria-label="Text formatting"><button class="tb" data-fmt="bold" title="Bold"><b>B</b></button><button class="tb" data-fmt="italic" title="Italic"><i>I</i></button><button class="tb" data-fmt="underline" title="Underline"><u>U</u></button><button class="tb" data-fmt="strikeThrough" title="Strikethrough"><s>S</s></button><button class="tb" data-fmt="hl" title="Highlight" style="background:rgba(255,214,10,.45)">Highlight</button><button class="tb" data-fmt="sm" title="Smaller text">A−</button><button class="tb" data-fmt="md" title="Normal size">A</button><button class="tb" data-fmt="lg" title="Larger text">A+</button><button class="tb" data-fmt="h" title="Heading">Heading</button><button class="tb" data-fmt="ul" title="Bulleted list">• List</button><button class="tb" data-fmt="ck" title="Checklist">☐ Checklist</button><button class="tb" data-fmt="removeFormat" title="Clear formatting">Clear</button></div><div class="body" id="eb" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note text"></div><div id="refs" class="refs"></div>
+ <input class="ttl" id="et" placeholder="Title" value="${esc(n.title)}"><div class="body" id="eb" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note text"></div><div id="refs" class="refs"></div>
  <div class="photos">${n.photos.map((p,i)=>`<div><img src="${p}" alt=""><button data-rmp="${i}" aria-label="Remove photo">×</button></div>`).join('')}</div>
  <div class="bar"><select class="f" id="ety" style="width:auto" aria-label="Type"><option value="note" ${n.type==='note'?'selected':''}>Note</option><option value="keep" ${n.type==='keep'?'selected':''}>Keep</option><option value="journal" ${n.type==='journal'?'selected':''}>Journal</option></select>
  <select class="f nbsel" id="ec" style="width:auto" aria-label="Notebook"><option value="">Inbox (no notebook)</option>${D.cols.map(c=>`<option value="${c.id}" ${n.col===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select><input class="f nbsel" id="etp" list="tpl" placeholder="Topic (optional)" value="${esc(n.topic||'')}" style="width:auto;max-width:190px" aria-label="Topic"><datalist id="tpl">${topics(n.col).map(t=>`<option value="${esc(t)}">`).join('')}</datalist></div>
@@ -264,7 +272,8 @@ document.addEventListener('click',e=>{
  else if(d.f){if(d.f==='days')S.f.days=S.f.days==+d.v?0:+d.v;else S.f[d.f]=!S.f[d.f];render()}
  else if(d.pick){const t=D.notes.find(x=>x.id===d.pick),s=getSelection(),r=PK.r;$('#eb').focus();s.removeAllRanges();r.deleteContents();s.addRange(r);ex('insertHTML','<a class="nl" data-nid="'+t.id+'" contenteditable="false">'+esc(title(t))+'</a>&nbsp;');$('#pick').remove();onEdit()}
  else if(d.act){const a=d.act,n=S.ed&&cur();
-  if(a==='theme'){const dark=getComputedStyle(document.documentElement).colorScheme==='dark';theme=dark?'light':'dark';document.documentElement.dataset.theme=theme;try{localStorage.setItem('nbTheme',theme)}catch(x){}}
+  if(a==='tools'){TB=!TB;try{localStorage.setItem('nbTools',TB?'1':'0')}catch(x){}const h=$('#hd');if(h)h.classList.toggle('off',!TB);t.classList.toggle('tg',TB)}
+  else if(a==='theme'){const dark=getComputedStyle(document.documentElement).colorScheme==='dark';theme=dark?'light':'dark';document.documentElement.dataset.theme=theme;try{localStorage.setItem('nbTheme',theme)}catch(x){}}
   else if(a==='export')exportSheet();
   else if(a==='capture'){const v=$('#cap').value.trim();if(!v&&!S.photos.length)return;newNote({body:v,photos:S.photos});S.photos=[];S.cap='';render()}
   else if(a==='close')closeNote();
@@ -326,6 +335,7 @@ const lv=iso=>{const d=new Date(iso);d.setMinutes(d.getMinutes()-d.getTimezoneOf
 const dueN=()=>D.notes.filter(n=>n.remind&&!n.done&&!n.archived&&n.remind<=new Date().toISOString()).length;
 const ex=(c,v)=>document.execCommand(c,false,v);
 function onEdit(){const n=cur(),b=$('#eb');if(!n||!b)return;n.upd=new Date().toISOString();n.html=b.innerHTML;n.body=b.innerText.replace(/\u200b/g,'');$('#sv').textContent='Saving…';clearTimeout(tm);tm=setTimeout(save,400);renderRefs();clearTimeout(bt);bt=setTimeout(linkify,700)}
+let TB=true;try{TB=localStorage.getItem('nbTools')==='1'}catch(e){}
 let bt,BW=false;
 document.addEventListener('pointerdown',e=>{BW=document.activeElement===document.getElementById('eb')},true);
 function caretOff(b){const s=getSelection();if(!s.rangeCount||!b.contains(s.anchorNode))return -1;const r=document.createRange();r.selectNodeContents(b);r.setEnd(s.anchorNode,s.anchorOffset);return r.toString().length}
@@ -345,7 +355,7 @@ function fx(c){$('#eb').focus();
  else if(c==='ck')ex('insertHTML','<div class="ck"><i class="cb" contenteditable="false"></i>\u200b</div>');
  else ex(c);
  onEdit()}
-document.addEventListener('mousedown',e=>{if(e.target.closest('.tb'))e.preventDefault()});
+document.addEventListener('mousedown',e=>{if(e.target.closest('.tb,.fmtb'))e.preventDefault()});
 document.addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('#eb')){e.preventDefault();ex('insertText',(e.clipboardData||window.clipboardData).getData('text/plain'))}});
 document.addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.id!=='eb')return;const s=getSelection();if(!s.rangeCount)return;let k=s.anchorNode;k=k.nodeType===3?k.parentNode:k;k=k.closest&&k.closest('.ck');if(!k)return;e.preventDefault();
  const empty=!k.textContent.replace(/\u200b/g,'').trim(),nx=document.createElement('div');
