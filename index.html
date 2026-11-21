@@ -235,7 +235,10 @@ function closeNote(){const n=S.ed&&cur();if(n&&!n.title&&!n.body.trim()&&!n.phot
 function shrink(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.7))};im.src=r.result};r.readAsDataURL(file)}
 function exportSheet(){const sh=$('#sheet');sh.hidden=false;sh.className='sheet';S.ed=null;
  const md=D.notes.slice().sort((a,b)=>a.created.localeCompare(b.created)).map(n=>`## ${title(n)}\n*${n.created}${n.type==='journal'?' · journal':''}${n.col?' · '+colName(n.col):''}*\n\n${n.body}\n`).join('\n---\n\n');
- sh.innerHTML=`<div class="in"><button class="ib" data-act="close" aria-label="Back" title="Back">${ic('back')}</button><h1>Export and restore</h1><p class="saved">Select all and copy, then paste into a file on your device. JSON includes photos and can be restored below. Markdown has text only.</p>
+ sh.innerHTML=`<div class="in"><button class="ib" data-act="close" aria-label="Back" title="Back">${ic('back')}</button><h1>Export and restore</h1><h2>Backup file</h2><p class="saved">One file with everything. Move it between devices or restore it here. Merge adds new and newer notes without deleting anything.</p><div class="bar"><button class="btn" data-act="bkfile">Save backup</button><button class="btn2" data-act="bkrest">Restore</button><button class="btn2" data-act="bkmerge">Merge</button></div>
+ <h2>Obsidian</h2><p class="saved">Export makes a .zip with one Markdown file per note (with properties). Import takes .md files or a .zip.</p><div class="bar"><button class="btn" data-act="obsexp">Export</button><button class="btn2" data-act="obsimp">Import</button></div>
+ <p class="saved" id="xmsg"></p><input type="file" id="fjson" accept=".json,application/json" hidden><input type="file" id="fmd" accept=".md,.markdown,.txt,.zip,text/markdown,application/zip" multiple hidden>
+ <h2>Copy and paste</h2><p class="saved">Select all and copy, then paste into a file on your device. JSON includes photos and can be restored below. Markdown has text only.</p>
  <div class="bar"><button class="btn2" data-x="json">JSON (full backup)</button><button class="btn2" data-x="md">Markdown</button></div>
  <textarea class="x" id="xo" readonly></textarea><div class="bar"><button class="btn" data-act="copyx">Copy</button></div>
  <h2>Notifications</h2><div class="bar"><button class="btn2" data-act="ntest">Test notification</button><button class="btn2" data-act="nexact">Exact alarm setting</button></div><p class="saved" id="nout"></p><h2>Restore from JSON</h2><textarea class="x" id="xi" style="height:120px" placeholder="Paste a JSON backup here"></textarea><div class="bar"><button class="btn2 danger" data-act="restore">Replace my data</button></div></div>`;
@@ -286,6 +289,10 @@ document.addEventListener('click',e=>{
   else if(a==='addcol'){const v=prompt('Notebook name');if(v&&v.trim()){D.cols.push({id:uid(),name:v.trim()});save();render()}}
   else if(a==='ren'){const c=D.cols.find(x=>x.id===S.col),v=prompt('New name',c.name);if(v&&v.trim()){c.name=v.trim();save();render()}}
   else if(a==='delcol'){if(confirm('Delete this notebook? Its notes go back to the Inbox.')){D.notes.forEach(x=>{if(x.col===S.col)x.col=null});D.cols=D.cols.filter(c=>c.id!==S.col);S.col=null;save();render()}}
+  else if(a==='bkfile')bkFile();
+  else if(a==='bkrest'||a==='bkmerge'){S.imode=a==='bkmerge'?'merge':'replace';$('#fjson').click()}
+  else if(a==='obsexp')obsExport();
+  else if(a==='obsimp')$('#fmd').click();
   else if(a==='plan')openPlan();
   else if(a==='planclose')$('#planov').hidden=true;
   else if(a==='ntest')nTest();
@@ -414,6 +421,79 @@ async function syncRem(){if(!LN)return;const l=D.notes.filter(n=>n.remind&&!n.do
  try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(x=>({id:x.id}))});
  if(l.length)await LN.schedule({notifications:l.map(n=>({id:nid(n.id),title:'Reminder',body:title(n),channelId:'reminders',schedule:{at:new Date(n.remind),allowWhileIdle:true},extra:{nid:n.id}}))});rsig=sig}catch(e){NERR=String(e&&e.message||e)}}
 function openPlan(){const o=$('#planov'),f=o.querySelector('iframe');if(!f.getAttribute('src')&&!f.srcdoc)f.src='plan.html';o.hidden=false}
+const CRCT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRCT[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function cat(a){const o=new Uint8Array(a.reduce((s,x)=>s+x.length,0));let p=0;a.forEach(x=>{o.set(x,p);p+=x.length});return o}
+function zipStore(files){const enc=new TextEncoder(),parts=[],cd=[],now=new Date(),dt=((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate(),tm=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);let off=0;
+ for(const f of files){const nm=enc.encode(f.name),crc=crc32(f.bytes),sz=f.bytes.length;
+  const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(10,tm,true);h.setUint16(12,dt,true);h.setUint32(14,crc,true);h.setUint32(18,sz,true);h.setUint32(22,sz,true);h.setUint16(26,nm.length,true);
+  parts.push(new Uint8Array(h.buffer),nm,f.bytes);
+  const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(12,tm,true);c.setUint16(14,dt,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+  cd.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+sz}
+ const cl=cd.reduce((s,x)=>s+x.length,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cl,true);e.setUint32(16,off,true);
+ return cat([...parts,...cd,new Uint8Array(e.buffer)])}
+async function unzip(buf){const v=new DataView(buf),u=new Uint8Array(buf);let e=-1;for(let i=buf.byteLength-22;i>=0;i--){if(v.getUint32(i,true)===0x06054b50){e=i;break}}if(e<0)throw new Error('Not a zip file');
+ const n=v.getUint16(e+10,true),out=[];let p=v.getUint32(e+16,true);
+ for(let i=0;i<n;i++){const meth=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true),name=new TextDecoder().decode(u.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;
+  if(name.endsWith('/'))continue;const st=lo+30+v.getUint16(lo+26,true)+v.getUint16(lo+28,true);let d=u.subarray(st,st+cs);
+  if(meth===8)d=new Uint8Array(await new Response(new Blob([d]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());else if(meth!==0)continue;
+  out.push({name,bytes:d})}return out}
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+async function saveFile(name,bytes,mime){const C=window.Capacitor,pl=(C&&C.Plugins)||{};
+ if(C&&C.isNativePlatform&&C.isNativePlatform()&&pl.Filesystem&&pl.Share){try{const r=await pl.Filesystem.writeFile({path:name,data:b64(bytes),directory:'CACHE'});await pl.Share.share({title:name,dialogTitle:name,url:r.uri});return}catch(e){if(/cancel/i.test(String(e&&e.message||e)))return}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type:mime}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+const slug=s=>String(s||'').replace(/[\\\/:*?"<>|#^\[\]]/g,' ').replace(/\s+/g,' ').trim().slice(0,80)||'Untitled';
+function h2md(html){const d=document.createElement('div');d.innerHTML=html;
+ const w=n=>{if(n.nodeType===3)return n.textContent;if(n.nodeType!==1)return '';const t=n.tagName,c=[...n.childNodes].map(w).join('');
+  if(n.classList.contains('ck'))return(n.classList.contains('on')?'- [x] ':'- [ ] ')+c.trim()+'\n';
+  if(t==='B'||t==='STRONG')return c.trim()?'**'+c+'**':c;if(t==='I'||t==='EM')return c.trim()?'*'+c+'*':c;if(t==='BR')return '\n';
+  if(t==='A'&&n.classList.contains('nl'))return '[['+c.replace(/^\[\[|\]\]$/g,'')+']]';
+  if(t==='H3')return '\n### '+c.trim()+'\n';if(t==='LI')return '- '+c.trim()+'\n';if(t==='UL'||t==='OL')return '\n'+c+'\n';
+  if(t==='DIV'||t==='P')return c+(c.endsWith('\n')?'':'\n');return c};
+ return w(d).replace(/\n{3,}/g,'\n\n').trim()}
+function obsFiles(){const enc=new TextEncoder(),files=[],used={},q=s=>'"'+String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
+ D.notes.forEach(n=>{const d=n.type==='journal'?'Journal':n.type==='keep'?'Keep':n.col?slug(colName(n.col)):'Notes',base=slug(n.type==='journal'?(n.created||'').slice(0,10)+' '+title(n):title(n));let k=d+'/'+base,c=1;while(used[k.toLowerCase()]){c++;k=d+'/'+base+' ('+c+')'}used[k.toLowerCase()]=1;
+  const tg=tagsIn(n.body||''),y=['---','created: '+n.created,'updated: '+(n.upd||n.created),'type: '+(n.type||'note')];if(n.title)y.push('title: '+q(n.title));
+  if(n.col)y.push('notebook: '+q(colName(n.col)));if(n.topic)y.push('topic: '+q(n.topic));if(tg.length)y.push('tags: ['+tg.join(', ')+']');
+  if(n.pinned)y.push('pinned: true');if(n.archived)y.push('archived: true');if(n.color)y.push('color: '+n.color);if(n.remind)y.push('reminder: '+n.remind);y.push('beroia_id: '+n.id,'---','');
+  let body=n.html?h2md(n.html):(n.body||'');
+  (n.photos||[]).forEach((p,i)=>{const m=String(p).match(/^data:image\/(\w+);base64,(.*)$/);if(!m)return;const nm='attachments/'+n.id+'-'+(i+1)+'.'+(m[1]==='jpeg'?'jpg':m[1]);files.push({name:nm,bytes:Uint8Array.from(atob(m[2]),x=>x.charCodeAt(0))});body+='\n\n![['+nm.split('/').pop()+']]'});
+  files.push({name:k+'.md',bytes:enc.encode(y.join('\n')+'\n'+body+'\n')})});
+ return files}
+async function obsExport(){const m=$('#xmsg');try{const f=obsFiles();await saveFile('beroia-obsidian-'+today()+'.zip',zipStore(f),'application/zip');m.textContent=f.filter(x=>/\.md$/.test(x.name)).length+' notes exported as Markdown.'}catch(e){m.textContent='Export failed: '+(e&&e.message||e)}}
+async function bkFile(){const m=$('#xmsg');try{await saveFile('beroia-backup-'+today()+'.json',new TextEncoder().encode(JSON.stringify(D)),'application/json');m.textContent='Backup file ready.'}catch(e){m.textContent='Backup failed: '+(e&&e.message||e)}}
+function parseMd(txt){let fm={},body=String(txt).replace(/\r\n?/g,'\n');const m=body.match(/^---\n([\s\S]*?)\n---[ \t]*(\n|$)/);
+ if(m){body=body.slice(m[0].length);let key=null;const uq=s=>s.trim().replace(/^["']|["']$/g,'');
+  m[1].split('\n').forEach(l=>{const kv=l.match(/^([\w-]+):\s*(.*)$/);if(kv){key=kv[1].toLowerCase();let v=kv[2].trim();fm[key]=(v.startsWith('[')&&v.endsWith(']'))?v.slice(1,-1).split(',').map(uq).filter(Boolean):uq(v)}else if(key&&/^\s*-\s+/.test(l)){if(!Array.isArray(fm[key]))fm[key]=fm[key]?[fm[key]]:[];fm[key].push(uq(l.replace(/^\s*-\s+/,'')))}})}
+ return{fm,body:body.replace(/^\n+/,'')}}
+function importMd(list){let add=0,skip=0;const ids=new Set(D.notes.map(n=>n.id)),sig=new Set(D.notes.map(n=>title(n)+'|'+(n.created||'').slice(0,16))),dv=x=>x&&!isNaN(new Date(x))?new Date(x).toISOString():'';
+ list.forEach(f=>{const pr=f.name.split('/').filter(Boolean),top=pr.length>1?pr[pr.length-2]:'',{fm,body}=parseMd(f.text);let base=pr[pr.length-1].replace(/\.(md|markdown|txt)$/i,''),type=String(fm.type||'').toLowerCase();
+  if(!['note','journal','keep'].includes(type))type=top==='Journal'?'journal':top==='Keep'?'keep':'note';
+  if(fm.beroia_id&&ids.has(String(fm.beroia_id))){skip++;return}
+  if(type==='journal')base=base.replace(/^\d{4}-\d{2}-\d{2}\s+/,'');
+  let nb=type==='note'?(String(fm.notebook||'')||(top&&!['Notes','attachments'].includes(top)?top:'')):'';
+  const created=dv(fm.created)||new Date(f.mtime||Date.now()).toISOString(),lines=body.replace(/\s+$/,'').split('\n'),task=lines.some(l=>/^\s*[-*]\s+\[[ xX]\]\s/.test(l));
+  let plain=lines.map(l=>l.replace(/^(\s*)[-*]\s+\[[ xX]\]\s+/,'$1')).join('\n');
+  const tg=[].concat(fm.tags||[]).map(t=>String(t).replace(/^#/,'').trim().replace(/\s+/g,'-')).filter(t=>t&&!tagsIn(plain).includes(t));
+  if(tg.length)plain+=(plain?'\n\n':'')+tg.map(t=>'#'+t).join(' ');
+  const first=(plain.split('\n').find(l=>l.trim())||'').trim().slice(0,60),ttl=fm.title?String(fm.title):((first===base||slug(first)===base)?'':base);
+  if(!fm.beroia_id&&sig.has((ttl||first||'Untitled')+'|'+created.slice(0,16))){skip++;return}
+  let col=null;if(nb){let c=D.cols.find(x=>x.name.toLowerCase()===nb.toLowerCase());if(!c){c={id:uid(),name:nb};D.cols.push(c)}col=c.id}
+  const id=fm.beroia_id?String(fm.beroia_id):uid(),n={id,title:ttl,body:plain,created,upd:dv(fm.updated)||created,type,col,topic:type==='note'?String(fm.topic||''):'',pinned:/^true$/i.test(fm.pinned),archived:/^true$/i.test(fm.archived),color:/^c[1-5]$/.test(fm.color||'')?fm.color:'',photos:[]};
+  if(task)n.html=lines.map(l=>{const t=l.match(/^\s*[-*]\s+\[([ xX])\]\s+(.*)$/);return t?'<div class="ck'+(t[1]!==' '?' on':'')+'"><i class="cb" contenteditable="false"></i>'+esc(t[2])+'</div>':'<div>'+(esc(l)||'<br>')+'</div>'}).join('');
+  if(dv(fm.reminder))n.remind=dv(fm.reminder);
+  D.notes.push(n);ids.add(id);add++});
+ save();return{add,skip}}
+async function impMd(inp){const m=$('#xmsg'),list=[];try{for(const f of [...inp.files]){if(/\.zip$/i.test(f.name)){for(const e of await unzip(await f.arrayBuffer())){if(/\.(md|markdown|txt)$/i.test(e.name)&&!/(^|\/)\./.test(e.name))list.push({name:e.name,text:new TextDecoder().decode(e.bytes),mtime:f.lastModified})}}else list.push({name:f.name,text:await f.text(),mtime:f.lastModified})}
+ if(list.length&&list.every(x=>x.name.includes('/'))&&new Set(list.map(x=>x.name.split('/')[0])).size===1)list.forEach(x=>x.name=x.name.split('/').slice(1).join('/'));
+ const r=importMd(list);m.textContent='Imported '+r.add+' notes'+(r.skip?' ('+r.skip+' already here, skipped)':'')+'.';render()}catch(e){m.textContent='Import failed: '+(e&&e.message||e)}inp.value=''}
+function mergeData(j){let a=0,u=0;j.cols.forEach(c=>{if(!D.cols.some(x=>x.id===c.id))D.cols.push(c)});
+ j.notes.forEach(n=>{const i=D.notes.findIndex(x=>x.id===n.id);if(i<0){D.notes.push(n);a++}else if((n.upd||n.created||'')>(D.notes[i].upd||D.notes[i].created||'')){D.notes[i]=n;u++}});
+ (j.trash||[]).forEach(n=>{if(!D.trash.some(x=>x.id===n.id)&&!D.notes.some(x=>x.id===n.id))D.trash.push(n)});save();return[a,u]}
+async function impJson(inp){const m=$('#xmsg');try{const f=inp.files[0];if(!f)return;const j=JSON.parse(await f.text());if(!j.notes||!j.cols)throw new Error('This is not a Beroia backup file');
+ if(S.imode==='merge'){const r=mergeData(j);m.textContent='Added '+r[0]+' new notes, updated '+r[1]+'.';render()}
+ else if(confirm('Replace everything with this backup?')){D=j;D.trash=D.trash||[];save();closeNote()}}catch(e){m.textContent='Restore failed: '+(e&&e.message||e)}inp.value=''}
+document.addEventListener('change',e=>{if(e.target.id==='fjson')impJson(e.target);else if(e.target.id==='fmd')impMd(e.target)});
 async function nTest(){const o=$('#nout');if(!LN){o.textContent='Native notifications are only available in the Android app.';return}
  try{const p=await LN.checkPermissions(),x=LN.checkExactNotificationSetting?await LN.checkExactNotificationSetting():{};
  await LN.createChannel({id:'reminders',name:'Reminders',importance:4,vibration:true,visibility:1});
