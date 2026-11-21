@@ -48,13 +48,13 @@ jobs:
       - name: Save APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: notebook-apk
+          name: beroia-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Publish APK to release "latest"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk notebook.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk beroia.apk
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest notebook.apk --title "Notebook (latest APK)" --notes "Debug APK built from commit ${{ github.sha }}"
+          gh release create latest beroia.apk --title "Beroia (latest APK)" --notes "Debug APK built from commit ${{ github.sha }}"
